@@ -36,15 +36,15 @@ func main() {
 	// Make the outline set to WALL
 	for i := 0; i < cols; i++ {
 		// Top row
-		world.Set(game.Loc(0, i), game.Wall)
+		world.SetTile(game.Loc(0, i), game.Wall)
 		// Bottom row
-		world.Set(game.Loc(rows-1, i), game.Wall)
+		world.SetTile(game.Loc(rows-1, i), game.Wall)
 	}
 	for i := 0; i < rows; i++ {
 		// Top row
-		world.Set(game.Loc(i, 0), game.Wall)
+		world.SetTile(game.Loc(i, 0), game.Wall)
 		// Bottom row
-		world.Set(game.Loc(i, cols-1), game.Wall)
+		world.SetTile(game.Loc(i, cols-1), game.Wall)
 	}
 	world.Spawn(rows/2, cols/2)
 

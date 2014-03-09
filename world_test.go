@@ -20,3 +20,38 @@ func TestNewWorld(t *testing.T) {
 		t.Errorf("expected 6 cols in data structure had %d", numCols)
 	}
 }
+
+func TestMove(t *testing.T) {
+  w := NewWorld(10, 10)
+  w.Spawn(5, 5)
+  if got := w.MovePlayer(-1, 0); got != Move {
+    t.Errorf("couldn't move to unobstructed spot: %v", got)
+  }
+}
+
+func TestInBounds(t *testing.T) {
+  w := NewWorld(10, 10)
+  w.Spawn(5, 5)
+  tests := []struct {
+    loc Location
+    want bool
+  } {
+    {
+      loc: Loc(4, 5),
+      want: true,
+    },
+    {
+      loc: Loc(0, 0),
+      want: true,
+    },
+    {
+      loc: Loc(10, 0),
+      want: false,
+    },
+  }
+  for _, test := range tests {
+    if got := w.InBounds(test.loc); got != test.want {
+      t.Errorf("loc %v got %v want %v", test.loc, got, test.want)
+    }
+  }
+}

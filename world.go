@@ -6,12 +6,26 @@ import (
 
 type Tile int32
 
+type Creature int32
+
+type MovementResult int32
+
 // TODO(ndunn): player isn't really a tile.
 const (
+  // Tiles
 	Floor Tile = iota
 	Wall
+	
+	// Creatures
+	None Creature = iota
 	Player
 	Monster
+	
+	// Movements
+	Move MovementResult = iota
+	OutOfBounds
+	Impassable 
+	CreatureOccupying
 )
 
 var (
@@ -21,8 +35,8 @@ var (
 type World struct {
 	rows, cols int
 	tiles      [][]Tile
-	playerLoc  Location
-	oldTile    Tile
+	creatures [][]Creature
+	playerLoc Location
 }
 
 func NewWorld(rows, cols int) *World {
@@ -30,24 +44,40 @@ func NewWorld(rows, cols int) *World {
 	for row := 0; row < rows; row++ {
 		tiles[row] = make([]Tile, cols)
 	}
+	creatures := make([][]Creature, rows)
+	for row := 0; row < rows; row++ {
+		creatures[row] = make([]Creature, cols)
+		for col := 0; col < cols; col++ {
+		  creatures[row][col] = None
+		}
+	}
 	return &World{
 		rows:      rows,
 		cols:      cols,
 		tiles:     tiles,
+		creatures: creatures,
 		playerLoc: InvalidPlayerLoc,
 	}
 }
 
-func (w *World) PlayerLoc() Location {
-	return w.playerLoc
-}
-
-func (w *World) At(loc Location) Tile {
+func (w *World) TileAt(loc Location) Tile {
 	return w.tiles[loc.Row][loc.Col]
 }
 
-func (w *World) Set(loc Location, t Tile) {
+func (w *World) SetTile(loc Location, t Tile) {
 	w.tiles[loc.Row][loc.Col] = t
+}
+
+func (w *World) CreatureAt(loc Location) Creature {
+  return w.creatures[loc.Row][loc.Col]
+}
+
+func (w *World) SetCreature(loc Location, c Creature) MovementResult {
+  res := w.CanMoveTo(loc)
+  if res == Move {
+	  w.creatures[loc.Row][loc.Col] = c
+  }
+  return res
 }
 
 func (w *World) Rows() int {
@@ -62,8 +92,9 @@ func (w *World) Spawn(row, col int) {
 	if w.playerLoc != InvalidPlayerLoc {
 		panic("player already spawned")
 	}
-	w.oldTile = w.tiles[row][col]
-	w.Set(Loc(row, col), Player)
+	if w.SetCreature(Loc(row, col), Player) != Move {
+    panic("player can't spawn here")
+	}
 	w.playerLoc = Loc(row, col)
 }
 
@@ -71,11 +102,9 @@ func (w *World) Spawn(row, col int) {
 func (w *World) SpawnMonster() bool {
 	for row := 0; row < w.Rows(); row++ {
 		for col := 0; col < w.Cols(); col++ {
-			if w.At(Loc(row, col)) == Floor {
-				w.Set(Loc(row, col), Monster)
+		  if w.SetCreature(Loc(row, col), Monster) == Move {
 				return true
 			}
-			// FIXME(ndunn): this is insane to have to keep track of old tiles etc.
 		}
 	}
 	return false
@@ -83,27 +112,42 @@ func (w *World) SpawnMonster() bool {
 
 // MovePlayer moves the player the given number of rows/cols relative
 // to where he already is. No-op if out of bounds / can't move there.
-func (w *World) MovePlayer(rows, cols int) {
+func (w *World) MovePlayer(rows, cols int) MovementResult {
 	newLoc := w.playerLoc.Add(Location{Row: rows, Col: cols})
-	if !w.CanMoveTo(newLoc) {
-		return
+	res := w.SetCreature(newLoc, Player)
+	if res == Move {
+	  // Remove old value
+	  w.SetCreature(w.playerLoc, None)
+	  w.playerLoc = newLoc
 	}
-	// Restore the old tile
-	w.Set(w.playerLoc, w.oldTile)
-	w.playerLoc = newLoc
-	// Save old value of tile matrix and put the player there
-	w.oldTile = w.At(newLoc)
-	w.Set(newLoc, Player)
+	fmt.Printf("can move? to %v %v\n", newLoc, res)
+	return res
 }
 
-func (w *World) CanMoveTo(loc Location) bool {
-	// In bounds
-	inBounds := loc.Row >= 0 && loc.Row < w.Rows() &&
+func (w *World) InBounds(loc Location) bool {
+  return loc.Row >= 0 && loc.Row < w.Rows() &&
 		loc.Col >= 0 && loc.Col < w.Cols()
+}
+
+func (w *World) CanMoveTo(loc Location) MovementResult {
+  fmt.Printf("can move to rows %v cols %v %v\n", w.Rows(), w.Cols(), loc)
+	// In bounds
+	inBounds := w.InBounds(loc)
 	if !inBounds {
-		return false
+		return OutOfBounds
 	}
-	return w.At(loc).Passable()
+	
+	// Is there a creature in that spot
+	// TODO ndunn this probably needs to change for combat to work
+	if got := w.CreatureAt(loc); got != None {
+	  return CreatureOccupying
+	}
+	
+	passable := w.TileAt(loc).Passable()
+	if !passable {
+	  return Impassable
+	}
+	return Move
 }
 
 func (t Tile) Rune() rune {
@@ -112,10 +156,6 @@ func (t Tile) Rune() rune {
 		return ' '
 	case Wall:
 		return '*'
-	case Player:
-		return 'P'
-	case Monster:
-		return 'M'
 	default:
 		panic(fmt.Sprintf("unknown tile type %v", t))
 	}
@@ -126,6 +166,35 @@ func (t Tile) Passable() bool {
 		return true
 	}
 	return false
+}
+
+func (c Creature) Rune() rune {
+  switch c {
+    case None:
+      return ' '
+    case Player:
+      return 'P'
+    case Monster:
+      return 'M'
+    default:
+    		panic(fmt.Sprintf("unknown monster type %v", c))
+  	}
+}
+
+func (m MovementResult) String() string {
+  switch m {
+    case Move:
+      return "Move"
+  	case OutOfBounds:
+  	  return "Out of bounds"
+  	case Impassable:
+  	  return "Impassable"
+  	case CreatureOccupying:
+  	  return "Creature"
+	  default:
+  		panic(fmt.Sprintf("unknown movement result type %v", m))
+
+  }
 }
 
 /*
@@ -143,5 +212,8 @@ func (w World) String() string {
 }*/
 
 func (w *World) RuneAt(loc Location) rune {
-	return w.tiles[loc.Row][loc.Col].Rune()
+  if c := w.CreatureAt(loc); c != None {
+    return c.Rune()
+  }
+	return w.TileAt(loc).Rune()
 }
