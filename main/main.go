@@ -33,36 +33,30 @@ func main() {
 	defer termbox.Close()
 	termbox.HideCursor()
 
-	room := game.NewRoom(rows, cols)
-	// Make the outline set to WALL
-	for i := 0; i < cols; i++ {
-		// Top row
-		room.SetTile(game.Loc(0, i), game.Wall)
-		// Bottom row
-		room.SetTile(game.Loc(rows-1, i), game.Wall)
-	}
-	for i := 0; i < rows; i++ {
-		// Top row
-		room.SetTile(game.Loc(i, 0), game.Wall)
-		// Bottom row
-		room.SetTile(game.Loc(i, cols-1), game.Wall)
-	}
-	room.Spawn(rows/2, cols/2)
+	room1 := game.WalledRoom(rows, cols)
+	room1.Spawn(rows/2, cols/2)
+	room1.SpawnMonster()
+	room1.SpawnMonster()
 
-	room.SpawnMonster()
-	room.SpawnMonster()
-	
-	// Door to north
-	room.SetTile(game.Loc(0, cols/2), game.Door)
 	// Door to east
-	room.SetTile(game.Loc(rows/2, cols-1), game.Door)
-	// Door to west
-	room.SetTile(game.Loc(rows/2, 0), game.Door)
+	room1.SetTile(game.Loc(rows/2, cols-1), game.Door)
 	// Door to south
-	room.SetTile(game.Loc(rows-1, cols/2), game.Door)
+	room1.SetTile(game.Loc(rows-1, cols/2), game.Door)
 
-	world := game.NewWorld(1, 1)
-	world.Set(game.Loc(0, 0), room)
+	// 2nd room to east of room 1
+	room2 := game.WalledRoom(rows, cols)
+	// Door to west back to room 1
+	room2.SetTile(game.Loc(rows/2, 0), game.Door)
+
+	// 3rd room to south of room 1
+	room3 := game.WalledRoom(rows, cols)
+	// Door to north back to room 1
+	room3.SetTile(game.Loc(0, cols/2), game.Door)
+
+	world := game.NewWorld(2, 2)
+	world.Set(game.Loc(0, 0), room1)
+	world.Set(game.Loc(0, 1), room2)
+	world.Set(game.Loc(1, 0), room3)
 	Render(world)
 
 	// Main game loop

@@ -60,6 +60,24 @@ func NewRoom(rows, cols int) *Room {
 	}
 }
 
+func WalledRoom(rows, cols int) *Room {
+	r := NewRoom(rows, cols)
+	// Make the outline set to WALL
+	for i := 0; i < cols; i++ {
+		// Top row
+		r.SetTile(Loc(0, i), Wall)
+		// Bottom row
+		r.SetTile(Loc(rows-1, i), Wall)
+	}
+	for i := 0; i < rows; i++ {
+		// Top row
+		r.SetTile(Loc(i, 0), Wall)
+		// Bottom row
+		r.SetTile(Loc(i, cols-1), Wall)
+	}
+	return r
+}
+
 func (w *Room) TileAt(loc Location) Tile {
 	return w.tiles[loc.Row][loc.Col]
 }
@@ -162,7 +180,7 @@ func (t Tile) Rune() rune {
 }
 
 func (t Tile) Passable() bool {
-	if t == Floor || t == Door{
+	if t == Floor || t == Door {
 		return true
 	}
 	return false
