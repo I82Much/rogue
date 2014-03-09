@@ -25,7 +25,7 @@ func NewWorld(rows, cols int) World {
 }
 
 func (w World) At(row, col int) Tile {
-	return w[row][col]
+	return w.tiles[row][col]
 }
 
 func (w World) Rows() int {
