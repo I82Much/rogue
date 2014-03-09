@@ -51,6 +51,15 @@ func main() {
 
 	room.SpawnMonster()
 	room.SpawnMonster()
+	
+	// Door to north
+	room.SetTile(game.Loc(0, cols/2), game.Door)
+	// Door to east
+	room.SetTile(game.Loc(rows/2, cols-1), game.Door)
+	// Door to west
+	room.SetTile(game.Loc(rows/2, 0), game.Door)
+	// Door to south
+	room.SetTile(game.Loc(rows-1, cols/2), game.Door)
 
 	world := game.NewWorld(1, 1)
 	world.Set(game.Loc(0, 0), room)

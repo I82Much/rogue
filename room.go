@@ -14,6 +14,7 @@ const (
 	// Tiles
 	Floor Tile = iota
 	Wall
+	Door
 
 	// Creatures
 	None Creature = iota
@@ -153,13 +154,15 @@ func (t Tile) Rune() rune {
 		return ' '
 	case Wall:
 		return '*'
+	case Door:
+		return 'D'
 	default:
 		panic(fmt.Sprintf("unknown tile type %v", t))
 	}
 }
 
 func (t Tile) Passable() bool {
-	if t == Floor {
+	if t == Floor || t == Door{
 		return true
 	}
 	return false
