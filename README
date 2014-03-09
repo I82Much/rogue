@@ -2,3 +2,9 @@ This is my entry into the 2014 [7 day rogue like challenge](http://www.roguebasi
 
 Since I've never distributed a game before I'm going to purposely keep the scope extremely limited - ascii graphics, turn based, grid based, etc.
 
+Install termbox:
+
+go get github.com/nsf/termbox-go
+
+cd into main
+go run main.go
