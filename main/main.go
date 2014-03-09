@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	game "github.com/I82Much/roguelike"
 	termbox "github.com/nsf/termbox-go"
 )
@@ -12,6 +10,18 @@ const (
 	cols = 32
 )
 
+func Render(w *game.World) {
+	for row := 0; row < w.Rows(); row++ {
+		for col := 0; col < w.Cols(); col++ {
+			// col = x, row = y
+			location := game.Loc(row, col)
+			termbox.SetCell(col, row, w.RuneAt(location), termbox.ColorDefault, termbox.ColorDefault)
+		}
+	}
+	termbox.Flush()
+	termbox.HideCursor()
+}
+
 func main() {
 
 	// Set up controller
@@ -20,6 +30,7 @@ func main() {
 		panic(err)
 	}
 	defer termbox.Close()
+	termbox.HideCursor()
 
 	world := game.NewWorld(rows, cols)
 	// Make the outline set to WALL
@@ -37,14 +48,16 @@ func main() {
 	}
 	world.Spawn(rows/2, cols/2)
 
-	fmt.Printf("%v\n", world)
+	world.SpawnMonster()
+	world.SpawnMonster()
+
+	Render(world)
 
 	// Main game loop
 	for {
 
 		// Read input
 		event := termbox.PollEvent()
-		fmt.Printf("%v\n", event)
 		switch event.Key {
 		case termbox.KeyArrowUp:
 			world.MovePlayer(-1, 0)
@@ -53,14 +66,12 @@ func main() {
 		case termbox.KeyArrowDown:
 			world.MovePlayer(1, 0)
 		case termbox.KeyArrowLeft:
-			world.MovePlayer(-1, 0)
+			world.MovePlayer(0, -1)
 			// Quit
 		case termbox.KeyCtrlC:
 			return
 		}
-
 		// Render world
-		fmt.Printf("%v\n", world)
-
+		Render(world)
 	}
 }

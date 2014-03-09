@@ -2,7 +2,6 @@ package rogue
 
 import (
 	"fmt"
-	"strings"
 )
 
 type Tile int32
@@ -12,6 +11,7 @@ const (
 	Floor Tile = iota
 	Wall
 	Player
+	Monster
 )
 
 var (
@@ -25,12 +25,12 @@ type World struct {
 	oldTile    Tile
 }
 
-func NewWorld(rows, cols int) World {
+func NewWorld(rows, cols int) *World {
 	tiles := make([][]Tile, rows)
 	for row := 0; row < rows; row++ {
 		tiles[row] = make([]Tile, cols)
 	}
-	return World{
+	return &World{
 		rows:      rows,
 		cols:      cols,
 		tiles:     tiles,
@@ -38,23 +38,27 @@ func NewWorld(rows, cols int) World {
 	}
 }
 
-func (w World) At(loc Location) Tile {
+func (w *World) PlayerLoc() Location {
+	return w.playerLoc
+}
+
+func (w *World) At(loc Location) Tile {
 	return w.tiles[loc.Row][loc.Col]
 }
 
-func (w World) Set(loc Location, t Tile) {
+func (w *World) Set(loc Location, t Tile) {
 	w.tiles[loc.Row][loc.Col] = t
 }
 
-func (w World) Rows() int {
+func (w *World) Rows() int {
 	return w.rows
 }
 
-func (w World) Cols() int {
+func (w *World) Cols() int {
 	return w.cols
 }
 
-func (w World) Spawn(row, col int) {
+func (w *World) Spawn(row, col int) {
 	if w.playerLoc != InvalidPlayerLoc {
 		panic("player already spawned")
 	}
@@ -63,9 +67,23 @@ func (w World) Spawn(row, col int) {
 	w.playerLoc = Loc(row, col)
 }
 
+// Attempts to spawn a monster
+func (w *World) SpawnMonster() bool {
+	for row := 0; row < w.Rows(); row++ {
+		for col := 0; col < w.Cols(); col++ {
+			if w.At(Loc(row, col)) == Floor {
+				w.Set(Loc(row, col), Monster)
+				return true
+			}
+			// FIXME(ndunn): this is insane to have to keep track of old tiles etc.
+		}
+	}
+	return false
+}
+
 // MovePlayer moves the player the given number of rows/cols relative
 // to where he already is. No-op if out of bounds / can't move there.
-func (w World) MovePlayer(rows, cols int) {
+func (w *World) MovePlayer(rows, cols int) {
 	newLoc := w.playerLoc.Add(Location{Row: rows, Col: cols})
 	if !w.CanMoveTo(newLoc) {
 		return
@@ -78,7 +96,7 @@ func (w World) MovePlayer(rows, cols int) {
 	w.Set(newLoc, Player)
 }
 
-func (w World) CanMoveTo(loc Location) bool {
+func (w *World) CanMoveTo(loc Location) bool {
 	// In bounds
 	inBounds := loc.Row >= 0 && loc.Row < w.Rows() &&
 		loc.Col >= 0 && loc.Col < w.Cols()
@@ -88,14 +106,16 @@ func (w World) CanMoveTo(loc Location) bool {
 	return w.At(loc).Passable()
 }
 
-func (t Tile) String() string {
+func (t Tile) Rune() rune {
 	switch t {
 	case Floor:
-		return " "
+		return ' '
 	case Wall:
-		return "*"
+		return '*'
 	case Player:
-		return "P"
+		return 'P'
+	case Monster:
+		return 'M'
 	default:
 		panic(fmt.Sprintf("unknown tile type %v", t))
 	}
@@ -108,6 +128,7 @@ func (t Tile) Passable() bool {
 	return false
 }
 
+/*
 // TODO(ndunn): rendering shouldn't be in world.
 func (w World) String() string {
 	rows := make([]string, w.Rows())
@@ -119,4 +140,8 @@ func (w World) String() string {
 		rows = append(rows, rowString)
 	}
 	return strings.Join(rows, "\n")
+}*/
+
+func (w *World) RuneAt(loc Location) rune {
+	return w.tiles[loc.Row][loc.Col].Rune()
 }
