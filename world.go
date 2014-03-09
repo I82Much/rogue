@@ -1,5 +1,10 @@
 package rogue
 
+import (
+  "fmt"
+  "strings"
+)
+
 type Tile int32
 
 const (
@@ -34,4 +39,28 @@ func (w World) Rows() int {
 
 func (w World) Cols() int {
 	return w.cols
+}
+
+func (t Tile) String() string {
+  switch t {
+    case FLOOR:
+      return "O"
+    case WALL:
+      return "*"
+    default:
+      panic(fmt.Sprintf("unknown tile type %v", t))
+  }
+}
+
+// TODO(ndunn): rendering shouldn't be in world.
+func (w World) String() string {
+  rows := make([]string, w.Rows())
+  for _, row := range w.tiles {
+    rowString := ""
+    for _, tile := range row {
+      rowString += tile.String()
+    }
+    rows = append(rows, rowString)
+  }
+  return strings.Join(rows, "\n")
 }
