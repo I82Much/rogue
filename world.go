@@ -82,8 +82,10 @@ func (w World) CanMoveTo(loc Location) bool {
 	// In bounds
 	inBounds := loc.Row >= 0 && loc.Row < w.Rows() &&
 		loc.Col >= 0 && loc.Col < w.Cols()
-	passable := w.At(loc) == Floor
-	return inBounds && passable
+	if !inBounds {
+		return false
+	}
+	return w.At(loc).Passable()
 }
 
 func (t Tile) String() string {
@@ -97,6 +99,13 @@ func (t Tile) String() string {
 	default:
 		panic(fmt.Sprintf("unknown tile type %v", t))
 	}
+}
+
+func (t Tile) Passable() bool {
+	if t == Floor {
+		return true
+	}
+	return false
 }
 
 // TODO(ndunn): rendering shouldn't be in world.

@@ -13,6 +13,14 @@ const (
 )
 
 func main() {
+
+	// Set up controller
+	err := termbox.Init()
+	if err != nil {
+		panic(err)
+	}
+	defer termbox.Close()
+
 	world := game.NewWorld(rows, cols)
 	// Make the outline set to WALL
 	for i := 0; i < cols; i++ {
@@ -36,6 +44,7 @@ func main() {
 
 		// Read input
 		event := termbox.PollEvent()
+		fmt.Printf("%v\n", event)
 		switch event.Key {
 		case termbox.KeyArrowUp:
 			world.MovePlayer(-1, 0)
@@ -45,6 +54,9 @@ func main() {
 			world.MovePlayer(1, 0)
 		case termbox.KeyArrowLeft:
 			world.MovePlayer(-1, 0)
+			// Quit
+		case termbox.KeyCtrlC:
+			return
 		}
 
 		// Render world
