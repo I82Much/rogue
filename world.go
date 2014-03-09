@@ -12,19 +12,19 @@ type MovementResult int32
 
 // TODO(ndunn): player isn't really a tile.
 const (
-  // Tiles
+	// Tiles
 	Floor Tile = iota
 	Wall
-	
+
 	// Creatures
 	None Creature = iota
 	Player
 	Monster
-	
+
 	// Movements
 	Move MovementResult = iota
 	OutOfBounds
-	Impassable 
+	Impassable
 	CreatureOccupying
 )
 
@@ -35,8 +35,8 @@ var (
 type World struct {
 	rows, cols int
 	tiles      [][]Tile
-	creatures [][]Creature
-	playerLoc Location
+	creatures  [][]Creature
+	playerLoc  Location
 }
 
 func NewWorld(rows, cols int) *World {
@@ -48,7 +48,7 @@ func NewWorld(rows, cols int) *World {
 	for row := 0; row < rows; row++ {
 		creatures[row] = make([]Creature, cols)
 		for col := 0; col < cols; col++ {
-		  creatures[row][col] = None
+			creatures[row][col] = None
 		}
 	}
 	return &World{
@@ -69,15 +69,15 @@ func (w *World) SetTile(loc Location, t Tile) {
 }
 
 func (w *World) CreatureAt(loc Location) Creature {
-  return w.creatures[loc.Row][loc.Col]
+	return w.creatures[loc.Row][loc.Col]
 }
 
 func (w *World) SetCreature(loc Location, c Creature) MovementResult {
-  res := w.CanMoveTo(loc)
-  if res == Move {
-	  w.creatures[loc.Row][loc.Col] = c
-  }
-  return res
+	res := w.CanMoveTo(loc)
+	if res == Move {
+		w.creatures[loc.Row][loc.Col] = c
+	}
+	return res
 }
 
 func (w *World) Rows() int {
@@ -93,7 +93,7 @@ func (w *World) Spawn(row, col int) {
 		panic("player already spawned")
 	}
 	if w.SetCreature(Loc(row, col), Player) != Move {
-    panic("player can't spawn here")
+		panic("player can't spawn here")
 	}
 	w.playerLoc = Loc(row, col)
 }
@@ -102,7 +102,7 @@ func (w *World) Spawn(row, col int) {
 func (w *World) SpawnMonster() bool {
 	for row := 0; row < w.Rows(); row++ {
 		for col := 0; col < w.Cols(); col++ {
-		  if w.SetCreature(Loc(row, col), Monster) == Move {
+			if w.SetCreature(Loc(row, col), Monster) == Move {
 				return true
 			}
 		}
@@ -116,36 +116,34 @@ func (w *World) MovePlayer(rows, cols int) MovementResult {
 	newLoc := w.playerLoc.Add(Location{Row: rows, Col: cols})
 	res := w.SetCreature(newLoc, Player)
 	if res == Move {
-	  // Remove old value
-	  w.SetCreature(w.playerLoc, None)
-	  w.playerLoc = newLoc
+		// Remove old value
+		w.creatures[w.playerLoc.Row][w.playerLoc.Col] = None
+		w.playerLoc = newLoc
 	}
-	fmt.Printf("can move? to %v %v\n", newLoc, res)
 	return res
 }
 
 func (w *World) InBounds(loc Location) bool {
-  return loc.Row >= 0 && loc.Row < w.Rows() &&
+	return loc.Row >= 0 && loc.Row < w.Rows() &&
 		loc.Col >= 0 && loc.Col < w.Cols()
 }
 
 func (w *World) CanMoveTo(loc Location) MovementResult {
-  fmt.Printf("can move to rows %v cols %v %v\n", w.Rows(), w.Cols(), loc)
 	// In bounds
 	inBounds := w.InBounds(loc)
 	if !inBounds {
 		return OutOfBounds
 	}
-	
+
 	// Is there a creature in that spot
 	// TODO ndunn this probably needs to change for combat to work
 	if got := w.CreatureAt(loc); got != None {
-	  return CreatureOccupying
+		return CreatureOccupying
 	}
-	
+
 	passable := w.TileAt(loc).Passable()
 	if !passable {
-	  return Impassable
+		return Impassable
 	}
 	return Move
 }
@@ -169,32 +167,32 @@ func (t Tile) Passable() bool {
 }
 
 func (c Creature) Rune() rune {
-  switch c {
-    case None:
-      return ' '
-    case Player:
-      return 'P'
-    case Monster:
-      return 'M'
-    default:
-    		panic(fmt.Sprintf("unknown monster type %v", c))
-  	}
+	switch c {
+	case None:
+		return ' '
+	case Player:
+		return 'P'
+	case Monster:
+		return 'M'
+	default:
+		panic(fmt.Sprintf("unknown monster type %v", c))
+	}
 }
 
 func (m MovementResult) String() string {
-  switch m {
-    case Move:
-      return "Move"
-  	case OutOfBounds:
-  	  return "Out of bounds"
-  	case Impassable:
-  	  return "Impassable"
-  	case CreatureOccupying:
-  	  return "Creature"
-	  default:
-  		panic(fmt.Sprintf("unknown movement result type %v", m))
+	switch m {
+	case Move:
+		return "Move"
+	case OutOfBounds:
+		return "Out of bounds"
+	case Impassable:
+		return "Impassable"
+	case CreatureOccupying:
+		return "Creature"
+	default:
+		panic(fmt.Sprintf("unknown movement result type %v", m))
 
-  }
+	}
 }
 
 /*
@@ -212,8 +210,8 @@ func (w World) String() string {
 }*/
 
 func (w *World) RuneAt(loc Location) rune {
-  if c := w.CreatureAt(loc); c != None {
-    return c.Rune()
-  }
+	if c := w.CreatureAt(loc); c != None {
+		return c.Rune()
+	}
 	return w.TileAt(loc).Rune()
 }
