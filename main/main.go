@@ -10,12 +10,13 @@ const (
 	cols = 32
 )
 
-func Render(w *game.Room) {
-	for row := 0; row < w.Rows(); row++ {
-		for col := 0; col < w.Cols(); col++ {
+func Render(w *game.World) {
+	r := w.CurrentRoom()
+	for row := 0; row < r.Rows(); row++ {
+		for col := 0; col < r.Cols(); col++ {
 			// col = x, row = y
 			location := game.Loc(row, col)
-			termbox.SetCell(col, row, w.RuneAt(location), termbox.ColorDefault, termbox.ColorDefault)
+			termbox.SetCell(col, row, r.RuneAt(location), termbox.ColorDefault, termbox.ColorDefault)
 		}
 	}
 	termbox.Flush()
@@ -51,7 +52,9 @@ func main() {
 	room.SpawnMonster()
 	room.SpawnMonster()
 
-	Render(room)
+	world := game.NewWorld(1, 1)
+	world.Set(game.Loc(0, 0), room)
+	Render(world)
 
 	// Main game loop
 	for {
@@ -60,18 +63,18 @@ func main() {
 		event := termbox.PollEvent()
 		switch event.Key {
 		case termbox.KeyArrowUp:
-			room.MovePlayer(-1, 0)
+			world.MovePlayer(-1, 0)
 		case termbox.KeyArrowRight:
-			room.MovePlayer(0, 1)
+			world.MovePlayer(0, 1)
 		case termbox.KeyArrowDown:
-			room.MovePlayer(1, 0)
+			world.MovePlayer(1, 0)
 		case termbox.KeyArrowLeft:
-			room.MovePlayer(0, -1)
+			world.MovePlayer(0, -1)
 			// Quit
 		case termbox.KeyCtrlC:
 			return
 		}
 		// Render world
-		Render(room)
+		Render(world)
 	}
 }
