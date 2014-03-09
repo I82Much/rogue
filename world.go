@@ -10,7 +10,6 @@ type Creature int32
 
 type MovementResult int32
 
-// TODO(ndunn): player isn't really a tile.
 const (
 	// Tiles
 	Floor Tile = iota
@@ -21,7 +20,7 @@ const (
 	Player
 	Monster
 
-	// Movements
+	// Movement possibilities
 	Move MovementResult = iota
 	OutOfBounds
 	Impassable
