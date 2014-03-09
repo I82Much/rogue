@@ -1,7 +1,7 @@
 package main
 
 import (
-	game "github.com/I82Much/roguelike"
+	game "github.com/I82Much/rogue"
 	termbox "github.com/nsf/termbox-go"
 )
 
@@ -10,7 +10,7 @@ const (
 	cols = 32
 )
 
-func Render(w *game.World) {
+func Render(w *game.Room) {
 	for row := 0; row < w.Rows(); row++ {
 		for col := 0; col < w.Cols(); col++ {
 			// col = x, row = y
@@ -32,26 +32,26 @@ func main() {
 	defer termbox.Close()
 	termbox.HideCursor()
 
-	world := game.NewWorld(rows, cols)
+	room := game.NewRoom(rows, cols)
 	// Make the outline set to WALL
 	for i := 0; i < cols; i++ {
 		// Top row
-		world.SetTile(game.Loc(0, i), game.Wall)
+		room.SetTile(game.Loc(0, i), game.Wall)
 		// Bottom row
-		world.SetTile(game.Loc(rows-1, i), game.Wall)
+		room.SetTile(game.Loc(rows-1, i), game.Wall)
 	}
 	for i := 0; i < rows; i++ {
 		// Top row
-		world.SetTile(game.Loc(i, 0), game.Wall)
+		room.SetTile(game.Loc(i, 0), game.Wall)
 		// Bottom row
-		world.SetTile(game.Loc(i, cols-1), game.Wall)
+		room.SetTile(game.Loc(i, cols-1), game.Wall)
 	}
-	world.Spawn(rows/2, cols/2)
+	room.Spawn(rows/2, cols/2)
 
-	world.SpawnMonster()
-	world.SpawnMonster()
+	room.SpawnMonster()
+	room.SpawnMonster()
 
-	Render(world)
+	Render(room)
 
 	// Main game loop
 	for {
@@ -60,18 +60,18 @@ func main() {
 		event := termbox.PollEvent()
 		switch event.Key {
 		case termbox.KeyArrowUp:
-			world.MovePlayer(-1, 0)
+			room.MovePlayer(-1, 0)
 		case termbox.KeyArrowRight:
-			world.MovePlayer(0, 1)
+			room.MovePlayer(0, 1)
 		case termbox.KeyArrowDown:
-			world.MovePlayer(1, 0)
+			room.MovePlayer(1, 0)
 		case termbox.KeyArrowLeft:
-			world.MovePlayer(0, -1)
+			room.MovePlayer(0, -1)
 			// Quit
 		case termbox.KeyCtrlC:
 			return
 		}
 		// Render world
-		Render(world)
+		Render(room)
 	}
 }

@@ -194,7 +194,7 @@ func (m MovementResult) String() string {
 	}
 }
 
-func (w *) RuneAt(loc Location) rune {
+func (w *Room) RuneAt(loc Location) rune {
 	if c := w.CreatureAt(loc); c != None {
 		return c.Rune()
 	}
