@@ -14,7 +14,7 @@ const (
 	// Tiles
 	Floor Tile = iota
 	Wall
-	Door
+	DoorTile
 
 	// Creatures
 	None Creature = iota
@@ -29,14 +29,20 @@ const (
 )
 
 var (
-	InvalidPlayerLoc = Location{Row: -1, Col: -1}
+	InvalidLoc = Location{Row: -1, Col: -1}
 )
+
+type Door struct {
+	From, To *Room
+}
 
 type Room struct {
 	rows, cols int
 	tiles      [][]Tile
 	creatures  [][]Creature
 	playerLoc  Location
+	// Sparse map
+	doors map[Location]Door
 }
 
 func NewRoom(rows, cols int) *Room {
@@ -56,7 +62,8 @@ func NewRoom(rows, cols int) *Room {
 		cols:      cols,
 		tiles:     tiles,
 		creatures: creatures,
-		playerLoc: InvalidPlayerLoc,
+		playerLoc: InvalidLoc,
+		doors:     make(map[Location]Door),
 	}
 }
 
@@ -78,12 +85,21 @@ func WalledRoom(rows, cols int) *Room {
 	return r
 }
 
+func (w *Room) PlayerTile() Tile {
+	return w.TileAt(w.playerLoc)
+}
+
 func (w *Room) TileAt(loc Location) Tile {
 	return w.tiles[loc.Row][loc.Col]
 }
 
 func (w *Room) SetTile(loc Location, t Tile) {
 	w.tiles[loc.Row][loc.Col] = t
+}
+
+func (w *Room) SetDoor(loc Location, d Door) {
+	w.doors[loc] = d
+	w.SetTile(loc, DoorTile)
 }
 
 func (w *Room) CreatureAt(loc Location) Creature {
@@ -98,6 +114,14 @@ func (w *Room) SetCreature(loc Location, c Creature) MovementResult {
 	return res
 }
 
+func (w *Room) RemovePlayer() {
+	if w.playerLoc == InvalidLoc {
+		return
+	}
+	w.creatures[w.playerLoc.Row][w.playerLoc.Col] = None
+	w.playerLoc = InvalidLoc
+}
+
 func (w *Room) Rows() int {
 	return w.rows
 }
@@ -107,7 +131,7 @@ func (w *Room) Cols() int {
 }
 
 func (w *Room) Spawn(row, col int) {
-	if w.playerLoc != InvalidPlayerLoc {
+	if w.playerLoc != InvalidLoc {
 		panic("player already spawned")
 	}
 	if w.SetCreature(Loc(row, col), Player) != Move {
@@ -172,7 +196,7 @@ func (t Tile) Rune() rune {
 		return ' '
 	case Wall:
 		return '*'
-	case Door:
+	case DoorTile:
 		return 'D'
 	default:
 		panic(fmt.Sprintf("unknown tile type %v", t))
@@ -180,7 +204,7 @@ func (t Tile) Rune() rune {
 }
 
 func (t Tile) Passable() bool {
-	if t == Floor || t == Door {
+	if t == Floor || t == DoorTile {
 		return true
 	}
 	return false

@@ -1,5 +1,9 @@
 package rogue
 
+import (
+	"fmt"
+)
+
 // TODO implement world in terms of rooms
 
 type World struct {
@@ -28,7 +32,35 @@ func (w *World) Set(loc Location, r *Room) {
 
 func (w *World) MovePlayer(rows, cols int) MovementResult {
 	r := w.CurrentRoom()
-	return r.MovePlayer(rows, cols)
+	res := r.MovePlayer(rows, cols)
+	// Did player move onto a door
+	if res == Move && r.PlayerTile() == DoorTile {
+		d := r.doors[r.playerLoc]
+		if d.From == nil || d.To == nil {
+			panic(fmt.Sprintf("nil from/to for door at loc %v", r.playerLoc))
+		}
+
+		// Delete player from old room
+		r.RemovePlayer()
+		// spawn him into new room
+		newRoom := d.To
+		// FIXME(ndunn): needs to be in location adjacent to the door on other side
+		newRoom.Spawn(newRoom.Rows()/2, newRoom.Cols()/2)
+		// Find which of the rooms is the linked door
+		loc := InvalidLoc
+		for row := 0; row < len(w.rooms); row++ {
+			for col := 0; col < len(w.rooms[0]); col++ {
+				if w.RoomAt(Loc(row, col)) == newRoom {
+					loc = Loc(row, col)
+				}
+			}
+		}
+		if loc == InvalidLoc {
+			panic(fmt.Sprintf("couldn't find room in world whose value is %v", *newRoom))
+		}
+		w.currentRoom = loc
+	}
+	return res
 }
 
 func (w *World) CurrentRoom() *Room {

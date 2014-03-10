@@ -38,25 +38,42 @@ func main() {
 	room1.SpawnMonster()
 	room1.SpawnMonster()
 
-	// Door to east
-	room1.SetTile(game.Loc(rows/2, cols-1), game.Door)
-	// Door to south
-	room1.SetTile(game.Loc(rows-1, cols/2), game.Door)
-
 	// 2nd room to east of room 1
 	room2 := game.WalledRoom(rows, cols)
-	// Door to west back to room 1
-	room2.SetTile(game.Loc(rows/2, 0), game.Door)
 
 	// 3rd room to south of room 1
 	room3 := game.WalledRoom(rows, cols)
-	// Door to north back to room 1
-	room3.SetTile(game.Loc(0, cols/2), game.Door)
 
 	world := game.NewWorld(2, 2)
 	world.Set(game.Loc(0, 0), room1)
 	world.Set(game.Loc(0, 1), room2)
 	world.Set(game.Loc(1, 0), room3)
+
+	// Set up doors between the rooms
+	d1_2 := game.Door{
+		From: room1,
+		To:   room2,
+	}
+	// Door to east
+	room1.SetDoor(game.Loc(rows/2, cols-1), d1_2)
+	d2_1 := game.Door{
+		From: room2,
+		To:   room1,
+	}
+	room2.SetDoor(game.Loc(rows/2, 0), d2_1)
+
+	d1_3 := game.Door{
+		From: room1,
+		To:   room3,
+	}
+	// Door to south
+	room1.SetDoor(game.Loc(rows-1, cols/2), d1_3)
+	d3_1 := game.Door{
+		From: room3,
+		To:   room1,
+	}
+	room3.SetDoor(game.Loc(0, cols/2), d3_1)
+
 	Render(world)
 
 	// Main game loop
