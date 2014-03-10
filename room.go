@@ -34,6 +34,9 @@ var (
 
 type Door struct {
 	From, To *Room
+	// This door in a given room is the same as this other door in another room. This allows the world
+	// to place the player appropriately in the new room
+	Same *Door
 }
 
 type Room struct {
@@ -42,7 +45,7 @@ type Room struct {
 	creatures  [][]Creature
 	playerLoc  Location
 	// Sparse map
-	doors map[Location]Door
+	doors map[Location]*Door
 }
 
 func NewRoom(rows, cols int) *Room {
@@ -63,7 +66,7 @@ func NewRoom(rows, cols int) *Room {
 		tiles:     tiles,
 		creatures: creatures,
 		playerLoc: InvalidLoc,
-		doors:     make(map[Location]Door),
+		doors:     make(map[Location]*Door),
 	}
 }
 
@@ -85,6 +88,17 @@ func WalledRoom(rows, cols int) *Room {
 	return r
 }
 
+// DoorLocation returns the location of the given door, or nil if it doesn't exist
+func (w *Room) DoorLocation(d *Door) *Location {
+	for loc, door := range w.doors {
+		if door == d {
+			loc := loc
+			return &loc
+		}
+	}
+	return nil
+}
+
 func (w *Room) PlayerTile() Tile {
 	return w.TileAt(w.playerLoc)
 }
@@ -97,7 +111,7 @@ func (w *Room) SetTile(loc Location, t Tile) {
 	w.tiles[loc.Row][loc.Col] = t
 }
 
-func (w *Room) SetDoor(loc Location, d Door) {
+func (w *Room) SetDoor(loc Location, d *Door) {
 	w.doors[loc] = d
 	w.SetTile(loc, DoorTile)
 }

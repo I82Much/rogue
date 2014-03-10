@@ -44,8 +44,15 @@ func (w *World) MovePlayer(rows, cols int) MovementResult {
 		r.RemovePlayer()
 		// spawn him into new room
 		newRoom := d.To
-		// FIXME(ndunn): needs to be in location adjacent to the door on other side
-		newRoom.Spawn(newRoom.Rows()/2, newRoom.Cols()/2)
+
+		linkedDoor := d.Same
+		doorLoc := newRoom.DoorLocation(linkedDoor)
+		if doorLoc == nil {
+			panic(fmt.Sprintf("no linked door for %v", *linkedDoor))
+		}
+		// Where did user end up after walking through door
+		destination := doorLoc.Add(Loc(rows, cols))
+		newRoom.Spawn(destination.Row, destination.Col)
 		// Find which of the rooms is the linked door
 		loc := InvalidLoc
 		for row := 0; row < len(w.rooms); row++ {

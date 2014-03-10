@@ -50,28 +50,32 @@ func main() {
 	world.Set(game.Loc(1, 0), room3)
 
 	// Set up doors between the rooms
-	d1_2 := game.Door{
+	d1_2 := &game.Door{
 		From: room1,
 		To:   room2,
 	}
 	// Door to east
 	room1.SetDoor(game.Loc(rows/2, cols-1), d1_2)
-	d2_1 := game.Door{
+	d2_1 := &game.Door{
 		From: room2,
 		To:   room1,
+		Same: d1_2,
 	}
+	d1_2.Same = d2_1
 	room2.SetDoor(game.Loc(rows/2, 0), d2_1)
 
-	d1_3 := game.Door{
+	d1_3 := &game.Door{
 		From: room1,
 		To:   room3,
 	}
 	// Door to south
 	room1.SetDoor(game.Loc(rows-1, cols/2), d1_3)
-	d3_1 := game.Door{
+	d3_1 := &game.Door{
 		From: room3,
 		To:   room1,
+		Same: d1_3,
 	}
+	d1_3.Same = d3_1
 	room3.SetDoor(game.Loc(0, cols/2), d3_1)
 
 	Render(world)
