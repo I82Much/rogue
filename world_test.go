@@ -39,6 +39,15 @@ func TestDoors(t *testing.T) {
 		t.Errorf("expected player to have moved through door into room 2; was in room %v", *world.CurrentRoom())
 	}
 	if room2.playerLoc != Loc(rows/2, 1) {
-		t.Errorf("expected player to be one door east of east room's door; was at loc %v", room2.playerLoc)
+		t.Errorf("expected player to be one tile east of east room's door; was at loc %v", room2.playerLoc)
+	}
+
+	// Move him west through door - should end up back in room 1
+	world.MovePlayer(0, -1)
+	if world.CurrentRoom() != room1 {
+		t.Errorf("expected player to have moved through door back into room 1; was in room %v", *world.CurrentRoom())
+	}
+	if room1.playerLoc != Loc(rows/2, cols-2) {
+		t.Errorf("expected player to be one tile west of west room's door; was at loc %v", room1.playerLoc)
 	}
 }
