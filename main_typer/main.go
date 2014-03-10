@@ -25,6 +25,15 @@ func lerp(value1, value2, amt float64) float64 {
 	return ((value2 - value1) * amt) + value1
 }
 
+
+type Challenge struct {
+	word string
+	// How much has been spelled so far
+	spelled string
+	start time.Time
+	hits, attempts int
+}
+
 func main() {
 	// Set up controller
 	err := termbox.Init()
