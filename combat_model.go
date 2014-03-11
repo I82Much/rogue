@@ -39,6 +39,10 @@ type AttackWord struct {
 	duration time.Duration
 }
 
+func (w *AttackWord) Damage() int {
+	return len(w.word)
+}
+
 func NewWord(word string, dur time.Duration) *AttackWord {
 	return &AttackWord{
 		word:     word,
@@ -69,6 +73,10 @@ func (c *CombatModel) KillWord(w *AttackWord) {
 	if index == -1 {
 		panic(fmt.Sprintf("couldn't find word %v", w))
 	}
+}
+
+func (c *CombatModel) DamagePlayer(w *AttackWord) {
+	c.Player.Damage(w.Damage())
 }
 
 func (c *CombatModel) Update(typed []rune) {
@@ -107,5 +115,11 @@ func (c *CombatModel) Update(typed []rune) {
 		elapsed := now.Sub(word.onScreen)
 		row := int(doMap(elapsed.Seconds(), 0.0, word.duration.Seconds(), 0, float64(word.maxRows-1)))
 		word.row = row
+		
+		// Inflict damage on the player
+		if row > word.maxRows {
+			c.DamagePlayer(word)
+			c.KillWord(word)
+		}
 	}
 }
