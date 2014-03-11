@@ -2,18 +2,48 @@ package rogue
 
 import (
 	"fmt"
+	"strings"
 
 	termbox "github.com/nsf/termbox-go"
 )
 
 type CombatView struct {
 	Model *CombatModel
+	rows  int
 }
 
 // Render assumes that termbox has already been initialized.
 func (v *CombatView) Render() {
 	// Draw all of the falling words
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+
+	// Render the monsters
+	for i, monster := range v.Model.Monsters {
+		monsterFigure := `
+		 \ O /
+		   |
+		  / \`
+		healthBarWidth := 25
+
+		offset := i * (10 + healthBarWidth)
+
+		for row, figure := range strings.Split(monsterFigure, "\n") {
+			for j, char := range figure {
+				termbox.SetCell(offset+j, row, char, termbox.ColorDefault, termbox.ColorDefault)
+			}
+		}
+		// Draw the health bar
+		healthWidth := intMap(monster.Life, 0, monster.MaxLife, 0, healthBarWidth)
+		if healthWidth < 0 {
+			healthWidth = 0
+		}
+		for h := 0; h < healthWidth; h++ {
+			termbox.SetCell(offset+5+h, 0, '█', termbox.ColorRed, termbox.ColorDefault)
+		}
+	}
+
+	// Render the player
+
 	for _, word := range v.Model.Words() {
 		foreground := termbox.ColorDefault
 		if word == v.Model.CurrentlyTyping() {

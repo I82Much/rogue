@@ -60,12 +60,6 @@ func (c *CombatController) drainUnprocessed() []rune {
 func (c *CombatController) update() {
 	// Pull out the unprocessed runes
 	c.Model.Update(c.drainUnprocessed())
-
-	/*
-		// If we've run out of words, end it.
-		if !anyOnscreen {
-			stop()
-		}*/
 }
 
 func (c *CombatController) draw() {
