@@ -1,4 +1,4 @@
-package rogue
+package combat
 
 // TODO(ndunn): Figure out how to avoid duplication between monster and player.
 type Monster struct {
@@ -6,6 +6,8 @@ type Monster struct {
 	Life    int
 	Words   []*AttackWord
 }
+
+
 
 func NewMonster(life int) *Monster {
 	return &Monster{

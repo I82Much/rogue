@@ -1,4 +1,4 @@
-package rogue
+package combat
 
 import (
 	"fmt"

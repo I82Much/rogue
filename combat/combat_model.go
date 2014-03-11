@@ -1,10 +1,11 @@
-package rogue
+package combat
 
 import (
 	"fmt"
 	"time"
 
 	termbox "github.com/nsf/termbox-go"
+	"github.com/I82Much/rogue/math"
 )
 
 type CombatModel struct {
@@ -129,7 +130,7 @@ func (c *CombatModel) Update(typed []rune) {
 	var toRemove []*AttackWord
 	for _, word := range c.words {
 		elapsed := now.Sub(word.onScreen)
-		row := int(doMap(elapsed.Seconds(), 0.0, word.duration.Seconds(), 0, float64(word.maxRows-1)))
+		row := math.IntMap(int(elapsed.Nanoseconds()), 0.0, int(word.duration.Nanoseconds()), 0, word.maxRows-1)
 		word.row = row
 
 		// Inflict damage on the player

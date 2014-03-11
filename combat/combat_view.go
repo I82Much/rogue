@@ -1,9 +1,10 @@
-package rogue
+package combat
 
 import (
 	"fmt"
 	"strings"
 
+	"github.com/I82Much/rogue/math"
 	termbox "github.com/nsf/termbox-go"
 )
 
@@ -33,7 +34,7 @@ func (v *CombatView) Render() {
 			}
 		}
 		// Draw the health bar
-		healthWidth := intMap(monster.Life, 0, monster.MaxLife, 0, healthBarWidth)
+		healthWidth := math.IntMap(monster.Life, 0, monster.MaxLife, 0, healthBarWidth)
 		if healthWidth < 0 {
 			healthWidth = 0
 		}
@@ -74,7 +75,7 @@ func (v *CombatView) Render() {
 	// Draw player's health bar
 	healthWidth := 40
 	player := v.Model.Player
-	life := intMap(player.Life, 0, player.MaxLife, 0, healthWidth)
+	life := math.IntMap(player.Life, 0, player.MaxLife, 0, healthWidth)
 	if life < 0 {
 		life = 0
 	}

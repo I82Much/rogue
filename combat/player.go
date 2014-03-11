@@ -1,4 +1,4 @@
-package rogue
+package combat
 
 type Player struct {
 	MaxLife int
