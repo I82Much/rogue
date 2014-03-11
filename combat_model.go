@@ -1,8 +1,11 @@
 package rogue
 
 import (
+	
 	"fmt"
 	"time"
+	
+	termbox "github.com/nsf/termbox-go"
 )
 
 type CombatModel struct {
@@ -17,7 +20,7 @@ type CombatModel struct {
 	currentTyping  *AttackWord
 }
 
-func NewCombatModel(p *Player, m ...*Monster) *CombatModel {
+func NewCombatModel(p *Player, m []*Monster) *CombatModel {
 	var allWords []*AttackWord
 	for _, m1 := range m {
 		allWords = append(allWords, m1.Words...)
@@ -77,16 +80,15 @@ func (c *CombatModel) Over() bool {
 // KillWord removes the word from model, meaning that's it vanquished
 func (c *CombatModel) KillWord(w *AttackWord) {
 	// TODO(ndunn): score? update exp?
-	index := -1
 	for i, word := range c.words {
 		if word == w {
 			c.words = append(c.words[0:i], c.words[i+1:]...)
 			return
 		}
 	}
-	if index == -1 {
-		panic(fmt.Sprintf("couldn't find word %v", w))
-	}
+	// The terminal gets really screwed up if we don't shut down termbox first
+	termbox.Close()
+	panic(fmt.Sprintf("couldn't find word %v", w))
 }
 
 func (c *CombatModel) DamagePlayer(w *AttackWord) {
