@@ -81,7 +81,7 @@ func (c *CombatController) stop() {
 }
 
 // Modified from http://entropyinteractive.com/2011/02/game-engine-design-the-game-loop/
-func (c *CombatController) run(dur time.Duration) {
+func (c *CombatController) Run(dur time.Duration) {
 	c.runFlag = true
 	c.startup()
 	nextTime := time.Now()

@@ -4,7 +4,7 @@ package rogue
 type Monster struct {
 	MaxLife int
 	Life    int
-	Words   []string
+	Words   []*AttackWord
 }
 
 func NewMonster(life int) *Monster {

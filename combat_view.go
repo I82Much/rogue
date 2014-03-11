@@ -10,7 +10,9 @@ type CombatView struct {
 	Model *CombatModel
 }
 
+// Render assumes that termbox has already been initialized.
 func (v *CombatView) Render() {
+	// Draw all of the falling words
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 	for _, word := range v.Model.Words() {
 		foreground := termbox.ColorDefault
@@ -26,6 +28,7 @@ func (v *CombatView) Render() {
 		}
 	}
 
+	// Draw the % accuracy
 	if v.Model.attempts > 0 {
 		hits := v.Model.hits
 		attempts := v.Model.attempts
@@ -34,6 +37,5 @@ func (v *CombatView) Render() {
 			termbox.SetCell(i, 3, c, termbox.ColorDefault, termbox.ColorDefault)
 		}
 	}
-
 	termbox.Flush()
 }

@@ -17,6 +17,18 @@ type CombatModel struct {
 	currentTyping  *AttackWord
 }
 
+func NewCombatModel(p *Player, m ...*Monster) *CombatModel {
+	var allWords []*AttackWord
+	for _, m1 := range m {
+		allWords = append(allWords, m1.Words...)
+	}
+	return &CombatModel{
+		Monsters: m,
+		Player:   p,
+		words:    allWords,
+	}
+}
+
 type AttackWord struct {
 	word    string
 	spelled []rune
@@ -25,6 +37,15 @@ type AttackWord struct {
 	maxRows  int
 	onScreen time.Time
 	duration time.Duration
+}
+
+func NewWord(word string, dur time.Duration) *AttackWord {
+	return &AttackWord{
+		word:     word,
+		maxRows:  25,
+		onScreen: time.Now(),
+		duration: dur,
+	}
 }
 
 func (c *CombatModel) Words() []*AttackWord {
