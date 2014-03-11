@@ -86,7 +86,6 @@ func (v *CombatView) Render() {
 			termbox.SetCell(j, row, '░', termbox.ColorDefault, termbox.ColorDefault)
 		}
 	}
-	
 
 	for _, word := range v.Model.Words() {
 		foreground := termbox.ColorDefault

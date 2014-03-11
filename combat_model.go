@@ -1,10 +1,9 @@
 package rogue
 
 import (
-	
 	"fmt"
 	"time"
-	
+
 	termbox "github.com/nsf/termbox-go"
 )
 
@@ -127,15 +126,19 @@ func (c *CombatModel) Update(typed []rune) {
 		}
 	}
 
+	var toRemove []*AttackWord
 	for _, word := range c.words {
 		elapsed := now.Sub(word.onScreen)
 		row := int(doMap(elapsed.Seconds(), 0.0, word.duration.Seconds(), 0, float64(word.maxRows-1)))
 		word.row = row
-		
+
 		// Inflict damage on the player
 		if row > word.maxRows {
 			c.DamagePlayer(word)
-			c.KillWord(word)
+			toRemove = append(toRemove, word)
 		}
+	}
+	for _, word := range toRemove {
+		c.KillWord(word)
 	}
 }
