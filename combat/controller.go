@@ -87,10 +87,10 @@ func (c *CombatController) Run(dur time.Duration) {
 			nextTime = nextTime.Add(dur)
 			c.update()
 			// Really this should render some sort of victory/defeat screen
-			if c.Model.Over() {
+			/*if c.Model.Over() {
 				c.stop()
 
-			}
+			}*/
 			c.draw()
 		} else {
 			sleepTime := nextTime.Sub(now)
