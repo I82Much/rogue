@@ -32,15 +32,15 @@ func TestMove(t *testing.T) {
 func TestMoveRemovesPlayer(t *testing.T) {
 	w := NewRoom(10, 10)
 	w.Spawn(5, 5)
-	if w.CreatureAt(Loc(5, 5)) != Player {
+	if w.CreatureAt(Loc(5, 5)) != PlayerCreature {
 		t.Errorf("player didn't spawn")
 	}
 	w.MovePlayer(-1, 0)
 	if w.CreatureAt(Loc(5, 5)) != None {
-		t.Errorf("player wasn't reoved")
+		t.Errorf("player wasn't removed")
 	}
-	if w.CreatureAt(Loc(4, 5)) != Player {
-		t.Errorf("player did't ove")
+	if w.CreatureAt(Loc(4, 5)) != PlayerCreature {
+		t.Errorf("player did't move")
 	}
 }
 

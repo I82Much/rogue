@@ -2,13 +2,13 @@ package rogue
 
 type Player struct {
 	MaxLife int
-	Life int
+	Life    int
 }
 
-func NewPlayer(life int) *Player{
-	return &Player {
+func NewPlayer(life int) *Player {
+	return &Player{
 		MaxLife: life,
-		Life: life,
+		Life:    life,
 	}
 }
 

@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestDamageKills(t *testing.T) {
+func TestDamageKillsMonster(t *testing.T) {
 	m := NewMonster(100)
 	if m.IsDead() {
 		t.Errorf("should not be dead")

@@ -1,6 +1,10 @@
 package rogue
 
-type Combat struct {
+type CombatModel struct {
 	Monsters []Monster
-	Player Player
+	Player   Player
+}
+
+func (c *CombatModel) Update() {
+
 }

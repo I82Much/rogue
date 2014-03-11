@@ -18,8 +18,8 @@ const (
 
 	// Creatures
 	None Creature = iota
-	Player
-	Monster
+	PlayerCreature
+	MonsterCreature
 
 	// Movement possibilities
 	Move MovementResult = iota
@@ -148,7 +148,7 @@ func (w *Room) Spawn(row, col int) {
 	if w.playerLoc != InvalidLoc {
 		panic("player already spawned")
 	}
-	if w.SetCreature(Loc(row, col), Player) != Move {
+	if w.SetCreature(Loc(row, col), PlayerCreature) != Move {
 		panic("player can't spawn here")
 	}
 	w.playerLoc = Loc(row, col)
@@ -158,7 +158,7 @@ func (w *Room) Spawn(row, col int) {
 func (w *Room) SpawnMonster() bool {
 	for row := 0; row < w.Rows(); row++ {
 		for col := 0; col < w.Cols(); col++ {
-			if w.SetCreature(Loc(row, col), Monster) == Move {
+			if w.SetCreature(Loc(row, col), MonsterCreature) == Move {
 				return true
 			}
 		}
@@ -170,7 +170,7 @@ func (w *Room) SpawnMonster() bool {
 // to where he already is. No-op if out of bounds / can't move there.
 func (w *Room) MovePlayer(rows, cols int) MovementResult {
 	newLoc := w.playerLoc.Add(Location{Row: rows, Col: cols})
-	res := w.SetCreature(newLoc, Player)
+	res := w.SetCreature(newLoc, PlayerCreature)
 	if res == Move {
 		// Remove old value
 		w.creatures[w.playerLoc.Row][w.playerLoc.Col] = None
@@ -228,9 +228,9 @@ func (c Creature) Rune() rune {
 	switch c {
 	case None:
 		return ' '
-	case Player:
+	case PlayerCreature:
 		return 'P'
-	case Monster:
+	case MonsterCreature:
 		return 'M'
 	default:
 		panic(fmt.Sprintf("unknown monster type %v", c))

@@ -1,17 +1,16 @@
-package rogue 
-
+package rogue
 
 // TODO(ndunn): Figure out how to avoid duplication between monster and player.
 type Monster struct {
 	MaxLife int
-	Life int
-	Words []string
+	Life    int
+	Words   []string
 }
 
-func NewMonster(life int) *Monster{
-	return &Monster {
+func NewMonster(life int) *Monster {
+	return &Monster{
 		MaxLife: life,
-		Life: life,
+		Life:    life,
 	}
 }
 
