@@ -7,8 +7,6 @@ type Monster struct {
 	Words   []*AttackWord
 }
 
-
-
 func NewMonster(life int) *Monster {
 	return &Monster{
 		MaxLife: life,

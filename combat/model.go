@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	termbox "github.com/nsf/termbox-go"
 	"github.com/I82Much/rogue/math"
+	termbox "github.com/nsf/termbox-go"
 )
 
 type CombatModel struct {

@@ -2,9 +2,9 @@ package main
 
 import (
 	"time"
-	
-	game "github.com/I82Much/rogue/dungeon"
+
 	combat "github.com/I82Much/rogue/combat"
+	game "github.com/I82Much/rogue/dungeon"
 	termbox "github.com/nsf/termbox-go"
 )
 
@@ -111,7 +111,6 @@ func main() {
 
 	//
 
-
 	// Main game loop
 	for {
 
@@ -120,7 +119,7 @@ func main() {
 		switch event.Key {
 		case termbox.KeyArrowUp:
 			if res := world.MovePlayer(-1, 0); res == game.CreatureOccupying {
-					controller.Run(time.Duration(33) * time.Millisecond)
+				controller.Run(time.Duration(33) * time.Millisecond)
 			}
 		case termbox.KeyArrowRight:
 			world.MovePlayer(0, 1)

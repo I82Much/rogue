@@ -2,7 +2,7 @@ package main
 
 import (
 	combat "github.com/I82Much/rogue/combat"
-	
+
 	"time"
 )
 
