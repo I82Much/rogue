@@ -1,7 +1,7 @@
 package main
 
 import (
-	game "github.com/I82Much/rogue"
+	game "github.com/I82Much/rogue/dungeon"
 	termbox "github.com/nsf/termbox-go"
 )
 

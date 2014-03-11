@@ -1,4 +1,4 @@
-package rogue
+package dungeon
 
 type Location struct {
 	Row, Col int
