@@ -60,6 +60,20 @@ func (c *CombatModel) CurrentlyTyping() *AttackWord {
 	return c.currentTyping
 }
 
+// Over determines if the fight is over. Meaning either all enemies are dead, or player is dead
+func (c *CombatModel) Over() bool {
+	if c.Player.IsDead() {
+		return true
+	}
+	// If any monster is left, fight's not over
+	for _, m := range c.Monsters {
+		if !m.IsDead() {
+			return false
+		}
+	}
+	return true
+}
+
 // KillWord removes the word from model, meaning that's it vanquished
 func (c *CombatModel) KillWord(w *AttackWord) {
 	// TODO(ndunn): score? update exp?
