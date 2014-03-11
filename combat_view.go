@@ -44,6 +44,33 @@ func (v *CombatView) Render() {
 
 	// Render the player
 
+	playerFigure := `
+                                               +
+                +--------------+               |
+                |              |               |
+                |              |               |
++---------+     |              |               |
+|         |     |              |               |
+|         |     |              |            +----->
+|         |     |              |               |
+|         | +----------------------+           |
+|    ^    | |                      |           |
+|    |    | |                      |           |
+|    |    | |                      +-----------+
++----|----+ |                      +
+     +------+                      |
+            |                      |
+            |                      |
+            +----------------------+
+	
+	`
+	for row, figure := range strings.Split(playerFigure, "\n") {
+		for j, char := range figure {
+			finalRow := 10 + row
+			termbox.SetCell(j, finalRow, char, termbox.ColorDefault, termbox.ColorDefault)
+		}
+	}
+
 	for _, word := range v.Model.Words() {
 		foreground := termbox.ColorDefault
 		if word == v.Model.CurrentlyTyping() {
