@@ -44,6 +44,7 @@ func (v *CombatView) Render() {
 
 	// Render the player
 
+	// TODO(ndunn): all of the monster graphics etc should be moved into template files
 	playerFigure := `
                                                +
                 +--------------+               |
@@ -70,6 +71,22 @@ func (v *CombatView) Render() {
 			termbox.SetCell(j, finalRow, char, termbox.ColorDefault, termbox.ColorDefault)
 		}
 	}
+	// Draw player's health bar
+	healthWidth := 40
+	player := v.Model.Player
+	life := intMap(player.Life, 0, player.MaxLife, 0, healthWidth)
+	if life < 0 {
+		life = 0
+	}
+	for j := 0; j < healthWidth; j++ {
+		row := 15
+		if j < life {
+			termbox.SetCell(j, row, '█', termbox.ColorRed, termbox.ColorDefault)
+		} else {
+			termbox.SetCell(j, row, '░', termbox.ColorDefault, termbox.ColorDefault)
+		}
+	}
+	
 
 	for _, word := range v.Model.Words() {
 		foreground := termbox.ColorDefault
