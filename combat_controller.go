@@ -1,7 +1,7 @@
 package rogue
 
 import (
-	//	"fmt"
+	"fmt"
 	"sync"
 	"time"
 
@@ -69,6 +69,7 @@ func (c *CombatController) draw() {
 
 func shutdown() {
 	termbox.Close()
+	fmt.Printf("game over")
 }
 
 func (c *CombatController) stop() {
@@ -83,14 +84,13 @@ func (c *CombatController) Run(dur time.Duration) {
 	for c.runFlag {
 		now := time.Now()
 		if now.Sub(nextTime) >= dur {
-			//fmt.Printf("rendering at %v", now)
 			nextTime = nextTime.Add(dur)
 			c.update()
 			// Really this should render some sort of victory/defeat screen
-			/*if c.Model.Over() {
+			if c.Model.Over() {
 				c.stop()
-				fmt.Printf("game over")
-			}*/
+
+			}
 			c.draw()
 		} else {
 			sleepTime := nextTime.Sub(now)
