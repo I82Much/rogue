@@ -1,20 +1,39 @@
 package dungeon
 
-type Event int
-const (
-	EnterCombat Event = iota
+import (
+//	"fmt"
 )
 
-type Model struct {
-	world *World
-	// Where we emit events to
-	e chan<- Event
+type Event string
+
+const (
+	EnterCombat Event = "ENTER_COMBAT"
+)
+
+type DungeonListener interface {
+	Listen(e Event)
 }
 
-func NewModel(w *World, e chan<- Event) *Model {
+type Model struct {
+	world     *World
+	listeners []DungeonListener
+}
+
+func NewModel(w *World) *Model {
 	return &Model{
 		world: w,
-		e: e,
+	}
+}
+
+func (m *Model) AddListener(d DungeonListener) {
+	m.listeners = append(m.listeners, d)
+}
+
+func (m *Model) Publish(e Event) {
+	//	fmt.Printf("publishing %v\n", e)
+	for _, listener := range m.listeners {
+		//		fmt.Printf("publishing %v\n", e)
+		listener.Listen(e)
 	}
 }
 
@@ -22,9 +41,7 @@ func NewModel(w *World, e chan<- Event) *Model {
 func (m *Model) MovePlayer(rows, cols int) MovementResult {
 	res := m.world.MovePlayer(rows, cols)
 	if res == CreatureOccupying {
-		go func() {
-			m.e <- EnterCombat
-		}()
+		m.Publish(EnterCombat)
 	}
 	return res
 }
