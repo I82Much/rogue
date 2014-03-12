@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/I82Much/rogue/event"
 	termbox "github.com/nsf/termbox-go"
 )
 
@@ -14,10 +15,25 @@ type Controller struct {
 	Model   *Model
 	View    *View
 	runFlag bool
-
 	unprocessedRunes []rune
 	// Protects unprocessedRunes slice
 	runesMutex sync.Mutex
+}
+
+func NewModule(player *Player, monsters []*Monster) *Controller {
+	model := NewCombatModel(player, monsters)
+	view := &View{
+		Model: model,
+		rows: 20,
+	}
+	return &Controller {
+		Model: model,
+		View: view,
+	}
+}
+
+func (c *Controller) AddListener(d event.Listener) {
+	c.Model.AddListener(d)
 }
 
 func (c *Controller) startup() {
@@ -36,8 +52,9 @@ func (c *Controller) startup() {
 func (c *Controller) input() {
 	for c.runFlag {
 		event := termbox.PollEvent()
+		// TODO(ndunn): This should be done somewhere else.
 		if event.Key == termbox.KeyCtrlC {
-			c.stop()
+			c.Stop()
 		}
 		// They typed a letter
 		if event.Ch != 0 {
@@ -72,7 +89,12 @@ func shutdown() {
 	fmt.Printf("game over")
 }
 
-func (c *Controller) stop() {
+func (c *Controller) Start() {
+	c.startup()
+	c.Run(time.Duration(33) * time.Millisecond)
+}
+
+func (c *Controller) Stop() {
 	c.runFlag = false
 }
 

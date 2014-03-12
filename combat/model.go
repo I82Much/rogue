@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/I82Much/rogue/event"
 	"github.com/I82Much/rogue/math"
 	termbox "github.com/nsf/termbox-go"
 )
@@ -13,11 +14,22 @@ type Model struct {
 	Player   *Player
 
 	words []*AttackWord
+	listeners []event.Listener
 
 	attempts       int
 	hits           int
 	completedWords int
 	currentTyping  *AttackWord
+}
+
+func (m *Model) AddListener(d event.Listener) {
+	m.listeners = append(m.listeners, d)
+}
+
+func (m *Model) Publish(e string) {
+	for _, listener := range m.listeners {
+		listener.Listen(e)
+	}
 }
 
 func NewCombatModel(p *Player, m []*Monster) *Model {

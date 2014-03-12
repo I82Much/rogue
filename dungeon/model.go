@@ -1,22 +1,17 @@
 package dungeon
 
 import (
+	"github.com/I82Much/rogue/event"
 //	"fmt"
 )
 
-type Event string
-
 const (
-	EnterCombat Event = "ENTER_COMBAT"
+	EnterCombat = "ENTER_COMBAT"
 )
-
-type DungeonListener interface {
-	Listen(e Event)
-}
 
 type Model struct {
 	world     *World
-	listeners []DungeonListener
+	listeners []event.Listener
 }
 
 func NewModel(w *World) *Model {
@@ -25,14 +20,12 @@ func NewModel(w *World) *Model {
 	}
 }
 
-func (m *Model) AddListener(d DungeonListener) {
+func (m *Model) AddListener(d event.Listener) {
 	m.listeners = append(m.listeners, d)
 }
 
-func (m *Model) Publish(e Event) {
-	//	fmt.Printf("publishing %v\n", e)
+func (m *Model) Publish(e string) {
 	for _, listener := range m.listeners {
-		//		fmt.Printf("publishing %v\n", e)
 		listener.Listen(e)
 	}
 }

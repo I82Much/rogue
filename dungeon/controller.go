@@ -1,6 +1,7 @@
 package dungeon
 
 import (
+	"github.com/I82Much/rogue/event"
 	termbox "github.com/nsf/termbox-go"
 )
 
@@ -18,7 +19,17 @@ func NewController(model *Model, view *View) *Controller {
 	}
 }
 
-func (c *Controller) Run() {
+func NewModule(w *World) *Controller {
+	model := NewModel(w)
+	view := NewView(model)
+	return NewController(model, view)
+}
+
+func (c *Controller) AddListener(d event.Listener) {
+	c.model.AddListener(d)
+}
+
+func (c *Controller) Start() {
 	c.running = true
 
 	// Main game loop
@@ -28,10 +39,6 @@ func (c *Controller) Run() {
 		switch event.Key {
 		case termbox.KeyArrowUp:
 			c.model.MovePlayer(-1, 0)
-
-			/*if res := world.MovePlayer(-1, 0); res == game.CreatureOccupying {
-				controller.Run(time.Duration(33) * time.Millisecond)
-			}*/
 		case termbox.KeyArrowRight:
 			c.model.MovePlayer(0, 1)
 		case termbox.KeyArrowDown:
