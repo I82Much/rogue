@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	combat "github.com/I82Much/rogue/combat"
@@ -11,6 +12,10 @@ import (
 const (
 	rows = 16
 	cols = 32
+)
+
+var (
+	combats int
 )
 
 func makeDungeon() *game.Model {
@@ -59,7 +64,13 @@ func makeDungeon() *game.Model {
 	d1_3.Same = d3_1
 	room3.SetDoor(game.Loc(0, cols/2), d3_1)
 
-	return game.NewModel(world)
+	c := make(chan game.Event)
+	go func() {
+		<- c
+		combats++
+		fmt.Printf("%d combats\n", combats)
+	}()
+	return game.NewModel(world, c)
 }
 
 func makeCombatModel() *combat.Model {
