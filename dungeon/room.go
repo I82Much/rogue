@@ -204,37 +204,11 @@ func (w *Room) CanMoveTo(loc Location) MovementResult {
 	return Move
 }
 
-func (t Tile) Rune() rune {
-	switch t {
-	case Floor:
-		return ' '
-	case Wall:
-		return '*'
-	case DoorTile:
-		return 'D'
-	default:
-		panic(fmt.Sprintf("unknown tile type %v", t))
-	}
-}
-
 func (t Tile) Passable() bool {
 	if t == Floor || t == DoorTile {
 		return true
 	}
 	return false
-}
-
-func (c Creature) Rune() rune {
-	switch c {
-	case None:
-		return ' '
-	case PlayerCreature:
-		return 'P'
-	case MonsterCreature:
-		return 'M'
-	default:
-		panic(fmt.Sprintf("unknown monster type %v", c))
-	}
 }
 
 func (m MovementResult) String() string {
@@ -251,11 +225,4 @@ func (m MovementResult) String() string {
 		panic(fmt.Sprintf("unknown movement result type %v", m))
 
 	}
-}
-
-func (w *Room) RuneAt(loc Location) rune {
-	if c := w.CreatureAt(loc); c != None {
-		return c.Rune()
-	}
-	return w.TileAt(loc).Rune()
 }

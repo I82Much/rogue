@@ -10,9 +10,9 @@ import (
 
 // The controller accepts input and converts it into commands for the model and view
 
-type CombatController struct {
-	Model   *CombatModel
-	View    *CombatView
+type Controller struct {
+	Model   *Model
+	View    *View
 	runFlag bool
 
 	unprocessedRunes []rune
@@ -20,7 +20,7 @@ type CombatController struct {
 	runesMutex sync.Mutex
 }
 
-func (c *CombatController) startup() {
+func (c *Controller) startup() {
 	// Set up controller
 	err := termbox.Init()
 	if err != nil {
@@ -33,7 +33,7 @@ func (c *CombatController) startup() {
 	go c.input()
 }
 
-func (c *CombatController) input() {
+func (c *Controller) input() {
 	for c.runFlag {
 		event := termbox.PollEvent()
 		if event.Key == termbox.KeyCtrlC {
@@ -50,7 +50,7 @@ func (c *CombatController) input() {
 }
 
 // drainUnprocessed returns all unprocessed runes, and sets the unprocessedRunes to nil.
-func (c *CombatController) drainUnprocessed() []rune {
+func (c *Controller) drainUnprocessed() []rune {
 	c.runesMutex.Lock()
 	defer c.runesMutex.Unlock()
 	res := c.unprocessedRunes
@@ -58,12 +58,12 @@ func (c *CombatController) drainUnprocessed() []rune {
 	return res
 }
 
-func (c *CombatController) update() {
+func (c *Controller) update() {
 	// Pull out the unprocessed runes
 	c.Model.Update(c.drainUnprocessed())
 }
 
-func (c *CombatController) draw() {
+func (c *Controller) draw() {
 	c.View.Render()
 }
 
@@ -72,12 +72,12 @@ func shutdown() {
 	fmt.Printf("game over")
 }
 
-func (c *CombatController) stop() {
+func (c *Controller) stop() {
 	c.runFlag = false
 }
 
 // Modified from http://entropyinteractive.com/2011/02/game-engine-design-the-game-loop/
-func (c *CombatController) Run(dur time.Duration) {
+func (c *Controller) Run(dur time.Duration) {
 	c.runFlag = true
 	c.startup()
 	nextTime := time.Now()

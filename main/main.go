@@ -13,29 +13,7 @@ const (
 	cols = 32
 )
 
-func Render(w *game.World) {
-	r := w.CurrentRoom()
-	for row := 0; row < r.Rows(); row++ {
-		for col := 0; col < r.Cols(); col++ {
-			// col = x, row = y
-			location := game.Loc(row, col)
-			termbox.SetCell(col, row, r.RuneAt(location), termbox.ColorDefault, termbox.ColorDefault)
-		}
-	}
-	termbox.Flush()
-	termbox.HideCursor()
-}
-
-func main() {
-
-	// Set up controller
-	err := termbox.Init()
-	if err != nil {
-		panic(err)
-	}
-	defer termbox.Close()
-	termbox.HideCursor()
-
+func makeDungeon() *game.Model {
 	room1 := game.WalledRoom(rows, cols)
 	room1.Spawn(rows/2, cols/2)
 	room1.SpawnMonster()
@@ -81,8 +59,10 @@ func main() {
 	d1_3.Same = d3_1
 	room3.SetDoor(game.Loc(0, cols/2), d3_1)
 
-	Render(world)
+	return game.NewModel(world)
+}
 
+func makeCombatModel() *combat.Model {
 	player := combat.NewPlayer(20)
 	m1 := combat.NewMonster(10)
 	m1.Words = []*combat.AttackWord{
@@ -101,37 +81,32 @@ func main() {
 	}
 
 	model := combat.NewCombatModel(player, []*combat.Monster{m1, m2})
-	view := &combat.CombatView{
-		Model: model,
+	return model
+}
+
+func main() {
+	// Set up controller
+	err := termbox.Init()
+	if err != nil {
+		panic(err)
 	}
-	controller := &combat.CombatController{
-		Model: model,
-		View:  view,
-	}
+	termbox.HideCursor()
+	defer termbox.Close()
 
-	//
+	dungeonModel := makeDungeon()
+	dungeonView := game.NewView(dungeonModel)
+	dungeonView.Render()
+	dungeonController := game.NewController(dungeonModel, dungeonView)
 
-	// Main game loop
-	for {
-
-		// Read input
-		event := termbox.PollEvent()
-		switch event.Key {
-		case termbox.KeyArrowUp:
-			if res := world.MovePlayer(-1, 0); res == game.CreatureOccupying {
-				controller.Run(time.Duration(33) * time.Millisecond)
-			}
-		case termbox.KeyArrowRight:
-			world.MovePlayer(0, 1)
-		case termbox.KeyArrowDown:
-			world.MovePlayer(1, 0)
-		case termbox.KeyArrowLeft:
-			world.MovePlayer(0, -1)
-			// Quit
-		case termbox.KeyCtrlC:
-			return
+	/*
+		combatModel := makeCombatModel()
+		combatView := &combat.View{
+			Model: combatModel,
 		}
-		// Render world
-		Render(world)
-	}
+		combatController := &combat.Controller{
+			Model: combatModel,
+			View:  combatView,
+		}*/
+
+	dungeonController.Run()
 }

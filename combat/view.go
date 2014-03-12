@@ -8,13 +8,13 @@ import (
 	termbox "github.com/nsf/termbox-go"
 )
 
-type CombatView struct {
-	Model *CombatModel
+type View struct {
+	Model *Model
 	rows  int
 }
 
 // Render assumes that termbox has already been initialized.
-func (v *CombatView) Render() {
+func (v *View) Render() {
 	// Draw all of the falling words
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 

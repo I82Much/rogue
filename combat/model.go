@@ -8,7 +8,7 @@ import (
 	termbox "github.com/nsf/termbox-go"
 )
 
-type CombatModel struct {
+type Model struct {
 	Monsters []*Monster
 	Player   *Player
 
@@ -20,12 +20,12 @@ type CombatModel struct {
 	currentTyping  *AttackWord
 }
 
-func NewCombatModel(p *Player, m []*Monster) *CombatModel {
+func NewCombatModel(p *Player, m []*Monster) *Model {
 	var allWords []*AttackWord
 	for _, m1 := range m {
 		allWords = append(allWords, m1.Words...)
 	}
-	return &CombatModel{
+	return &Model{
 		Monsters: m,
 		Player:   p,
 		words:    allWords,
@@ -55,16 +55,16 @@ func NewWord(word string, dur time.Duration) *AttackWord {
 	}
 }
 
-func (c *CombatModel) Words() []*AttackWord {
+func (c *Model) Words() []*AttackWord {
 	return c.words
 }
 
-func (c *CombatModel) CurrentlyTyping() *AttackWord {
+func (c *Model) CurrentlyTyping() *AttackWord {
 	return c.currentTyping
 }
 
 // Over determines if the fight is over. Meaning either all enemies are dead, or player is dead
-func (c *CombatModel) Over() bool {
+func (c *Model) Over() bool {
 	if c.Player.IsDead() {
 		return true
 	}
@@ -78,7 +78,7 @@ func (c *CombatModel) Over() bool {
 }
 
 // KillWord removes the word from model, meaning that's it vanquished
-func (c *CombatModel) KillWord(w *AttackWord) {
+func (c *Model) KillWord(w *AttackWord) {
 	// TODO(ndunn): score? update exp?
 	for i, word := range c.words {
 		if word == w {
@@ -91,11 +91,11 @@ func (c *CombatModel) KillWord(w *AttackWord) {
 	panic(fmt.Sprintf("couldn't find word %v", w))
 }
 
-func (c *CombatModel) DamagePlayer(w *AttackWord) {
+func (c *Model) DamagePlayer(w *AttackWord) {
 	c.Player.Damage(w.Damage())
 }
 
-func (c *CombatModel) Update(typed []rune) {
+func (c *Model) Update(typed []rune) {
 	now := time.Now()
 	for _, r := range typed {
 		c.attempts++
