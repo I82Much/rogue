@@ -7,7 +7,7 @@ import (
 	"github.com/I82Much/rogue/combat"
 	"github.com/I82Much/rogue/dungeon"
 	"github.com/I82Much/rogue/title"
-	
+	"github.com/I82Much/rogue/gameover"
 )
 
 type Game struct {
@@ -112,7 +112,7 @@ func (g *Game) Stop() {
 func (g *Game) Listen(e string) {
 	switch e {
 		// Title screen
-	case title.Start:
+	case title.Start, gameover.Restart:
 		g.Stop()
 		c := makeDungeon()
 		c.AddListener(g)
@@ -129,8 +129,11 @@ func (g *Game) Listen(e string) {
 		// Combat
 	case combat.PlayerDied:
 		g.Stop()
-		// TODO go back to main title
-		fmt.Printf("Game over - you died")
+		c := gameover.NewModule()
+		c.AddListener(g)
+		g.curModule = c
+		g.Start()
+
 	case combat.AllMonstersDied:
 		g.Stop()
 		// TODO get loot
