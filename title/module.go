@@ -1,9 +1,7 @@
 package title
 
 import (
-	termbox "github.com/nsf/termbox-go"
-	"github.com/I82Much/rogue/event"
-	"github.com/I82Much/rogue/render"
+	"github.com/I82Much/rogue/static"
 )
 
 const (
@@ -25,64 +23,11 @@ ___________                         __________
 	Start = "START_GAME"
 )
 
-type Screen struct {
-	listeners []event.Listener
-	running bool
+func NewModule() *static.Module {
+	return static.NewModule(title, map[rune]string {
+		's': Start,
+		'S': Start,
+		'q': Quit,
+		'Q': Quit,
+	})
 }
-
-func NewModule() *Screen {
-	return &Screen{}
-}
-
-func (s *Screen) AddListener(d event.Listener) {
-	s.listeners = append(s.listeners, d)
-}
-
-// TODO(ndunn): render high score etc
-
-func Render() {
-	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	render.Render(title, 0, 0)
-	termbox.Flush()
-}
-
-func (s *Screen) Start() {
-	s.running = true
-	Render()
-	s.input()
-}
-
-func (s *Screen) Stop() {
-	s.running = false
-}
-
-func (s *Screen) publishStart() {
-	for _, d := range s.listeners {
-		d.Listen(Start)
-	}
-}
-
-func (s *Screen) publishQuit() {
-	for _, d := range s.listeners {
-		d.Listen(Quit)
-	}
-}
-
-func (s *Screen) input() {
-	for s.running {
-		event := termbox.PollEvent()
-		if event.Key == termbox.KeyCtrlC {
-			s.publishQuit()
-			s.Stop()
-		}
-		switch event.Ch {
-		case 'S', 's':
-			s.publishStart()
-		case 'Q', 'q':
-			s.publishQuit()
-			s.Stop()
-		}
-	}
-}
-
-
