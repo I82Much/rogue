@@ -1,7 +1,6 @@
 package combat
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -37,13 +36,6 @@ func (c *Controller) AddListener(d event.Listener) {
 }
 
 func (c *Controller) startup() {
-	// Set up controller
-	err := termbox.Init()
-	if err != nil {
-		panic(err)
-	}
-	termbox.HideCursor()
-
 	// TODO(ndunn): This should be a channel not goroutine since we cannot stop this after it starts
 	// Run the input polling loop in another goroutine
 	go c.input()
@@ -84,11 +76,6 @@ func (c *Controller) draw() {
 	c.View.Render()
 }
 
-func shutdown() {
-	termbox.Close()
-	fmt.Printf("game over")
-}
-
 func (c *Controller) Start() {
 	c.startup()
 	c.Run(time.Duration(33) * time.Millisecond)
@@ -101,23 +88,16 @@ func (c *Controller) Stop() {
 // Modified from http://entropyinteractive.com/2011/02/game-engine-design-the-game-loop/
 func (c *Controller) Run(dur time.Duration) {
 	c.runFlag = true
-	c.startup()
 	nextTime := time.Now()
 	for c.runFlag {
 		now := time.Now()
 		if now.Sub(nextTime) >= dur {
 			nextTime = nextTime.Add(dur)
 			c.update()
-			// Really this should render some sort of victory/defeat screen
-			/*if c.Model.Over() {
-				c.stop()
-
-			}*/
 			c.draw()
 		} else {
 			sleepTime := nextTime.Sub(now)
 			time.Sleep(sleepTime)
 		}
 	}
-	shutdown()
 }

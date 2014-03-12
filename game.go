@@ -91,7 +91,7 @@ func makeDungeon() Module {
 
 
 func NewGame() *Game {
-	d := makeDungeon()
+	d := makeCombatModule()
 	g := &Game {
 		curModule: d,
 	}

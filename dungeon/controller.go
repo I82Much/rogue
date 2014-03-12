@@ -31,7 +31,7 @@ func (c *Controller) AddListener(d event.Listener) {
 
 func (c *Controller) Start() {
 	c.running = true
-
+	c.view.Render()
 	// Main game loop
 	for c.running {
 		// Read input
