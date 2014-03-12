@@ -96,9 +96,9 @@ func main() {
 	defer termbox.Close()
 
 	dungeonModel := makeDungeon()
-	dungeonView := dungeon.NewView(dungeonModel)
-	dungeonView.Render()
-	dungeonController := dungeon.NewController(dungeonModel, dungeonView)
+	/*dungeonView := dungeon.NewView(dungeonModel)
+	dungeonView.Render()*/
+	//dungeonController := dungeon.NewController(dungeonModel, dungeonView)
 
 	combatModel := makeCombatModel()
 	/*
@@ -113,7 +113,6 @@ func main() {
 
 	gameModel := rogue.NewModel(dungeonModel, combatModel)
 	gameView := &rogue.View{}
-	/*gameController :=*/ rogue.NewController(gameModel, gameView)
-
-	dungeonController.Run()
+	gameController := rogue.NewController(gameModel, gameView)
+	gameController.Run()
 }
