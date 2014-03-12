@@ -3,14 +3,14 @@ package rogue
 import (
 	"fmt"
 	"time"
-	
+
 	"github.com/I82Much/rogue/combat"
 	"github.com/I82Much/rogue/dungeon"
 )
 
 type Game struct {
 	// TODO(ndunn): lots of game state here
-	
+
 	curModule Module
 }
 
@@ -89,10 +89,9 @@ func makeDungeon() Module {
 	return dungeon.NewModule(world)
 }
 
-
 func NewGame() *Game {
 	d := makeCombatModule()
-	g := &Game {
+	g := &Game{
 		curModule: d,
 	}
 	d.AddListener(g)
@@ -115,8 +114,17 @@ func (g *Game) Listen(e string) {
 		c.AddListener(g)
 		g.curModule = c
 		g.Start()
+	case combat.PlayerDied:
+		g.Stop()
+		// TODO go back to main title
+		fmt.Printf("Game over - you died")
+	case combat.AllMonstersDied:
+		g.Stop()
+		// TODO get loot
+		fmt.Printf("Game over - you win")
+
 	default:
-		fmt.Errorf("unknown event: %v", e)
+		fmt.Errorf("unknown event: %v\n", e)
 		g.Stop()
 	}
 }

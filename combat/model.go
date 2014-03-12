@@ -9,11 +9,16 @@ import (
 	termbox "github.com/nsf/termbox-go"
 )
 
+const (
+	PlayerDied      = "PLAYER_DIED"
+	AllMonstersDied = "MONSTERS_VANQUISHED"
+)
+
 type Model struct {
 	Monsters []*Monster
 	Player   *Player
 
-	words []*AttackWord
+	words     []*AttackWord
 	listeners []event.Listener
 
 	attempts       int
@@ -75,20 +80,6 @@ func (c *Model) CurrentlyTyping() *AttackWord {
 	return c.currentTyping
 }
 
-// Over determines if the fight is over. Meaning either all enemies are dead, or player is dead
-func (c *Model) Over() bool {
-	if c.Player.IsDead() {
-		return true
-	}
-	// If any monster is left, fight's not over
-	for _, m := range c.Monsters {
-		if !m.IsDead() {
-			return false
-		}
-	}
-	return true
-}
-
 // KillWord removes the word from model, meaning that's it vanquished
 func (c *Model) KillWord(w *AttackWord) {
 	// TODO(ndunn): score? update exp?
@@ -105,6 +96,20 @@ func (c *Model) KillWord(w *AttackWord) {
 
 func (c *Model) DamagePlayer(w *AttackWord) {
 	c.Player.Damage(w.Damage())
+}
+
+// Over determines if the fight is over. Meaning either all enemies are dead, or player is dead
+func (c *Model) PublishEndEvents() {
+	if c.Player.IsDead() {
+		c.Publish(PlayerDied)
+	}
+	// If any monster is left, fight's not over
+	for _, m := range c.Monsters {
+		if !m.IsDead() {
+			return
+		}
+	}
+	c.Publish(AllMonstersDied)
 }
 
 func (c *Model) Update(typed []rune) {
@@ -154,4 +159,6 @@ func (c *Model) Update(typed []rune) {
 	for _, word := range toRemove {
 		c.KillWord(word)
 	}
+
+	c.PublishEndEvents()
 }

@@ -11,9 +11,9 @@ import (
 // The controller accepts input and converts it into commands for the model and view
 
 type Controller struct {
-	Model   *Model
-	View    *View
-	runFlag bool
+	Model            *Model
+	View             *View
+	runFlag          bool
 	unprocessedRunes []rune
 	// Protects unprocessedRunes slice
 	runesMutex sync.Mutex
@@ -23,22 +23,16 @@ func NewModule(player *Player, monsters []*Monster) *Controller {
 	model := NewCombatModel(player, monsters)
 	view := &View{
 		Model: model,
-		rows: 20,
+		rows:  20,
 	}
-	return &Controller {
+	return &Controller{
 		Model: model,
-		View: view,
+		View:  view,
 	}
 }
 
 func (c *Controller) AddListener(d event.Listener) {
 	c.Model.AddListener(d)
-}
-
-func (c *Controller) startup() {
-	// TODO(ndunn): This should be a channel not goroutine since we cannot stop this after it starts
-	// Run the input polling loop in another goroutine
-	go c.input()
 }
 
 func (c *Controller) input() {
@@ -77,7 +71,7 @@ func (c *Controller) draw() {
 }
 
 func (c *Controller) Start() {
-	c.startup()
+	go c.input()
 	c.Run(time.Duration(33) * time.Millisecond)
 }
 
