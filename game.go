@@ -6,6 +6,8 @@ import (
 
 	"github.com/I82Much/rogue/combat"
 	"github.com/I82Much/rogue/dungeon"
+	"github.com/I82Much/rogue/title"
+	
 )
 
 type Game struct {
@@ -90,7 +92,7 @@ func makeDungeon() Module {
 }
 
 func NewGame() *Game {
-	d := makeCombatModule()
+	d := title.NewModule()
 	g := &Game{
 		curModule: d,
 	}
@@ -106,14 +108,25 @@ func (g *Game) Stop() {
 	g.curModule.Stop()
 }
 
+// Listen handles the state transitions between the different modules.
 func (g *Game) Listen(e string) {
 	switch e {
+		// Title screen
+	case title.Start:
+		g.Stop()
+		c := makeDungeon()
+		c.AddListener(g)
+		g.curModule = c
+		g.Start()
+		// Dungeon
 	case dungeon.EnterCombat:
 		g.Stop()
 		c := makeCombatModule()
 		c.AddListener(g)
 		g.curModule = c
 		g.Start()
+		
+		// Combat
 	case combat.PlayerDied:
 		g.Stop()
 		// TODO go back to main title

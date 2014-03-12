@@ -50,6 +50,7 @@ func (w *Room) RuneAt(loc Location) rune {
 }
 
 func renderRoom(r *Room) {
+	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 	for row := 0; row < r.Rows(); row++ {
 		for col := 0; col < r.Cols(); col++ {
 			// col = x, row = y
@@ -61,5 +62,6 @@ func renderRoom(r *Room) {
 }
 
 func (v *View) Render() {
+
 	renderRoom(v.model.world.CurrentRoom())
 }
