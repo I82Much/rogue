@@ -2,6 +2,7 @@ package combat
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/I82Much/rogue/math"
@@ -11,6 +12,20 @@ import (
 type View struct {
 	Model *Model
 	rows  int
+}
+
+func columnOffset(w *AttackWord) int {
+	// TODO(ndunn): this really needs to know the width of the window, the length of word, etc.
+	switch w.Col {
+	case Left:
+		return 5
+	case Center:
+		return 20
+	case Right:
+		return 35
+	default:
+		panic("unknown column")
+	}
 }
 
 // Render assumes that termbox has already been initialized.
@@ -89,6 +104,12 @@ func (v *View) Render() {
 	}
 
 	for _, word := range v.Model.Words() {
+		// Some words aren't actually visible yet - they're in the model but there's a delay
+		if !word.IsVisible() {
+			log.Printf("word %v is not visible", word.word)
+			continue
+		}
+
 		foreground := termbox.ColorDefault
 		if word == v.Model.CurrentlyTyping() {
 			foreground = foreground | termbox.AttrBold
@@ -104,12 +125,14 @@ func (v *View) Render() {
 			row = int(math.Lerp(0.0, float64(numRows), word.proportion))
 		}
 
+		colOffset := columnOffset(word)
 		// If we're defending, words are flying down towards player
 		for i, c := range word.word {
+			col := colOffset + i
 			if i < len(word.spelled) {
-				termbox.SetCell(i, row, c, termbox.ColorRed|termbox.AttrBold, termbox.ColorDefault)
+				termbox.SetCell(col, row, c, termbox.ColorRed|termbox.AttrBold, termbox.ColorDefault)
 			} else {
-				termbox.SetCell(i, row, c, foreground, termbox.ColorDefault)
+				termbox.SetCell(col, row, c, foreground, termbox.ColorDefault)
 			}
 		}
 	}

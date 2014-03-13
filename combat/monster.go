@@ -1,7 +1,6 @@
 package combat
 
 import (
-	"math/rand"
 	"time"
 )
 
@@ -38,8 +37,8 @@ func (m *Monster) Damage(life int) {
 func (p *Monster) GetWords(round int) []AttackWord {
 	w := words[round]
 	var res []AttackWord
-	for _, word := range w {
-		res = append(res, NewWord(word, time.Duration(rand.Int31n(10))*time.Second))
+	for i, word := range w {
+		res = append(res, NewWord(word, time.Duration(10)*time.Second, time.Duration(i)*time.Second))
 	}
 	return res
 }

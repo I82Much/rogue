@@ -17,6 +17,8 @@ const (
 
 type State string
 
+type Column string
+
 const (
 	EnteringAttack State = "ENTERING_ATTACK"
 	// Player is attacking
@@ -24,9 +26,15 @@ const (
 	EnteringDefense       = "ENTERING_DEFENSE"
 	// Player is defending
 	Defense State = "DEFENSE"
+
+	Left   Column = "LEFT"
+	Right  Column = "RIGHT"
+	Center Column = "CENTER"
 )
 
 var (
+	columns = []Column{Left, Center, Right}
+
 	// TODO(ndunn): this could shorten each time
 	interRoundTime = time.Duration(500) * time.Millisecond
 )
@@ -66,7 +74,7 @@ func NewCombatModel(p *Player, m []*Monster) *Model {
 		Monsters: m,
 		Player:   p,
 		// Player starts off defending against an onslaught of attacks
-		state:            EnteringAttack,
+		state:            EnteringDefense,
 		timeOfTransition: time.Now().Add(interRoundTime),
 	}
 }
@@ -76,21 +84,30 @@ type AttackWord struct {
 	spelled []rune
 	// How much fraction of time has elapsed for this word? Will render differently; e.g. attack could be going up towards
 	// the monsters, defense down towards player
-	proportion float64
-	onScreen   time.Time
-	duration   time.Duration
+	proportion   float64
+	initialDelay time.Duration
+	// When was it first rendered
+	onScreen time.Time
+	duration time.Duration
+	Col      Column
 }
 
 func (w *AttackWord) Damage() int {
 	return len(w.word)
 }
 
-func NewWord(word string, dur time.Duration) AttackWord {
+func (w *AttackWord) IsVisible() bool {
+	return time.Now().After(w.onScreen)
+}
+
+func NewWord(word string, dur time.Duration, initialDelay time.Duration) AttackWord {
 	return AttackWord{
-		word:       word,
-		proportion: 0.0,
-		onScreen:   time.Now(),
-		duration:   dur,
+		word:         word,
+		proportion:   0.0,
+		initialDelay: initialDelay,
+		onScreen:     time.Now().Add(initialDelay),
+		duration:     dur,
+		Col:          Left,
 	}
 }
 
@@ -111,12 +128,14 @@ func (c *Model) getAttackWords() []*AttackWord {
 			allWords = append(allWords, &w)
 		}
 	} else if c.state == Defense {
-		for _, m := range c.Monsters {
+		for i, m := range c.Monsters {
 			if m.IsDead() {
 				continue
 			}
 			for _, word := range m.GetWords(c.round) {
 				word := word
+				// Change the column that the word falls from based on which monster it is.
+				word.Col = columns[i%len(columns)]
 				allWords = append(allWords, &word)
 			}
 		}
@@ -153,7 +172,6 @@ func (c *Model) DamageMonster(w *AttackWord) {
 			monster.Damage(w.Damage())
 		}
 	}
-
 }
 
 func (c *Model) State() State {
@@ -185,6 +203,7 @@ func (c *Model) maybeTransition() {
 	} else if c.state == Attack && len(c.words) == 0 {
 		c.state = EnteringDefense
 		c.timeOfTransition = time.Now().Add(interRoundTime)
+		c.round++
 	} else if c.state == EnteringDefense && time.Now().After(c.timeOfTransition) {
 		c.state = Defense
 		if len(c.words) != 0 {

@@ -23,13 +23,13 @@ const (
 
 // TODO(ndunn): this needs to be pulled out of the world
 func makeCombatModule() Module {
-	player := combat.NewPlayer(20)
-	m1 := combat.NewMonster(10)
+	player := combat.NewPlayer(100)
+	m1 := combat.NewMonster(5)
 	/*m1.Words = []*combat.AttackWord{
 		combat.NewWord("Hello", time.Duration(3)*time.Second),
 		combat.NewWord("Supercalifragilistic", time.Duration(2)*time.Second),
 	}*/
-	m2 := combat.NewMonster(50)
+	m2 := combat.NewMonster(5)
 	/*m2.Words = []*combat.AttackWord{
 		combat.NewWord("World", time.Duration(1)*time.Second),
 		combat.NewWord("Blah", time.Duration(2)*time.Second),

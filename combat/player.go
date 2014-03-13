@@ -37,8 +37,11 @@ func (p *Player) Damage(life int) {
 func (p *Player) GetWords(round int) []AttackWord {
 	w := playerWords[round]
 	var res []AttackWord
-	for _, word := range w {
-		res = append(res, NewWord(word, time.Duration(rand.Int31n(10))*time.Second))
+	for i, word := range w {
+		attack := NewWord(word, time.Duration(rand.Int31n(10))*time.Second, time.Duration(0))
+		col := columns[i%len(columns)]
+		attack.Col = col
+		res = append(res, attack)
 	}
 	return res
 }
