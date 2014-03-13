@@ -18,11 +18,10 @@ var (
 	}
 )
 
-func NewPlayer(life int) *Player {
-
+func NewPlayer(cur, max int) *Player {
 	return &Player{
-		MaxLife: life,
-		Life:    life,
+		MaxLife: max,
+		Life:    cur,
 	}
 }
 

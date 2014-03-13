@@ -13,9 +13,9 @@ import (
 )
 
 type Game struct {
-	curModule Module
+	curModule     Module
 	dungeonModule *dungeon.Controller
-	player *player.Player
+	player        *player.Player
 }
 
 const (
@@ -24,8 +24,8 @@ const (
 )
 
 // TODO(ndunn): this needs to be pulled out of the world
-func makeCombatModule() Module {
-	player := combat.NewPlayer(100)
+func makeCombatModule(p *player.Player) Module {
+	player := combat.NewPlayer(int(p.Current), int(p.Max))
 	m1 := combat.NewMonster(5)
 	/*m1.Words = []*combat.AttackWord{
 		combat.NewWord("Hello", time.Duration(3)*time.Second),
@@ -97,9 +97,7 @@ func NewGame() *Game {
 	d := title.NewModule()
 	g := &Game{
 		curModule: d,
-		player: &player.Player{
-			Name: "Player 1",
-		},
+		player:    player.WithName("Player 1"),
 	}
 	d.AddListener(g)
 	return g
@@ -128,7 +126,7 @@ func (g *Game) Listen(e string) {
 		// Dungeon
 	case dungeon.EnterCombat:
 		g.Stop()
-		c := makeCombatModule()
+		c := makeCombatModule(g.player)
 		c.AddListener(g)
 		g.curModule = c
 		g.Start()

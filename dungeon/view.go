@@ -59,11 +59,13 @@ func (v *View) renderRoom(r *Room) {
 			termbox.SetCell(col, row, r.RuneAt(location), termbox.ColorDefault, termbox.ColorDefault)
 		}
 	}
-	
+
 	// Render data about the player
 	player := v.model.player
 	render.Render(player.Name, r.Rows(), 0)
-	render.Render(fmt.Sprintf("%v", player.Stats), r.Rows()+1, 0)
+	// Health
+	render.Render(fmt.Sprintf("%d/%d health", player.Current, player.Max), r.Rows()+1, 0)
+	render.Render(fmt.Sprintf("%v", player.Stats), r.Rows()+2, 0)
 	termbox.Flush()
 }
 

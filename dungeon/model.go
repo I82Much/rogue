@@ -11,7 +11,7 @@ const (
 
 type Model struct {
 	world     *World
-	player *player.Player
+	player    *player.Player
 	listeners []event.Listener
 
 	combatLocation Location
@@ -19,7 +19,7 @@ type Model struct {
 
 func NewModel(w *World, p *player.Player) *Model {
 	return &Model{
-		world: w,
+		world:  w,
 		player: p,
 	}
 }
@@ -44,4 +44,3 @@ func (m *Model) MovePlayer(rows, cols int) MovementResult {
 	}
 	return res
 }
-
