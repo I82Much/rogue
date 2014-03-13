@@ -105,7 +105,8 @@ func (c *Model) getAttackWords() []*AttackWord {
 	var allWords []*AttackWord
 	if c.state == Attack {
 		for _, w := range c.Player.GetWords(c.round) {
-			fmt.Printf("%v\n", w)
+			w := w
+			//fmt.Printf("%v\n", w)
 			allWords = append(allWords, &w)
 		}
 	} else if c.state == Defense {
@@ -114,6 +115,7 @@ func (c *Model) getAttackWords() []*AttackWord {
 				continue
 			}
 			for _, word := range m.GetWords(c.round) {
+				word := word
 				allWords = append(allWords, &word)
 			}
 		}
@@ -173,9 +175,11 @@ func (c *Model) PublishEndEvents() {
 // EnteringDefense -> Defense -> EnteringAttack -> Attack -> EnteringDefense and on and on.
 func (c *Model) maybeTransition() {
 	if c.state == Defense && len(c.words) == 0 {
+		c.currentTyping = nil
 		c.state = EnteringAttack
 		c.timeOfTransition = time.Now().Add(interRoundTime)
 	} else if c.state == Attack && len(c.words) == 0 {
+		c.currentTyping = nil
 		c.state = EnteringDefense
 		c.timeOfTransition = time.Now().Add(interRoundTime)
 	} else if c.state == EnteringDefense && time.Now().After(c.timeOfTransition) {
@@ -251,6 +255,5 @@ func (c *Model) Update(typed []rune) {
 
 	// Transition phases
 	c.maybeTransition()
-
-	//c.PublishEndEvents()
+	c.PublishEndEvents()
 }

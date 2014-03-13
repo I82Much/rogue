@@ -138,8 +138,11 @@ func (g *Game) Listen(e string) {
 
 	case combat.AllMonstersDied:
 		g.Stop()
+		c := makeDungeon()
+		c.AddListener(g)
+		g.curModule = c
+		g.Start()
 		// TODO get loot
-		fmt.Printf("Game over - you win")
 
 	default:
 		fmt.Errorf("unknown event: %v\n", e)
