@@ -2,6 +2,7 @@ package rogue
 
 import (
 	"fmt"
+	"log"
 	//	"time"
 
 	"github.com/I82Much/rogue/combat"
@@ -14,6 +15,8 @@ type Game struct {
 	// TODO(ndunn): lots of game state here
 
 	curModule Module
+
+	dungeonModule *dungeon.Controller
 }
 
 const (
@@ -43,7 +46,7 @@ func makeCombatModule() Module {
 }
 
 // TODO(ndunn): randomize
-func makeDungeon() Module {
+func makeDungeon() *dungeon.Controller {
 	room1 := dungeon.WalledRoom(rows, cols)
 	room1.Spawn(rows/2, cols/2)
 	room1.SpawnMonster()
@@ -110,15 +113,15 @@ func (g *Game) Stop() {
 
 // Listen handles the state transitions between the different modules.
 func (g *Game) Listen(e string) {
+	log.Printf("got event %v", e)
 	switch e {
 	// Title screen
 	case title.Start, gameover.Restart:
 		g.Stop()
-		// TODO ndunn fix me should be makeDUngeon
-		c := makeCombatModule()
-		//c := makeDungeon()
-		c.AddListener(g)
-		g.curModule = c
+		dm := makeDungeon()
+		dm.AddListener(g)
+		g.dungeonModule = dm
+		g.curModule = dm
 		g.Start()
 		// Dungeon
 	case dungeon.EnterCombat:
@@ -138,9 +141,9 @@ func (g *Game) Listen(e string) {
 
 	case combat.AllMonstersDied:
 		g.Stop()
-		c := makeDungeon()
-		c.AddListener(g)
-		g.curModule = c
+		g.curModule = g.dungeonModule
+		// Ugh.
+		g.dungeonModule.ReplaceMonsterWithPlayer()
 		g.Start()
 		// TODO get loot
 

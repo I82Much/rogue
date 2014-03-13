@@ -12,6 +12,8 @@ const (
 type Model struct {
 	world     *World
 	listeners []event.Listener
+
+	combatLocation Location
 }
 
 func NewModel(w *World) *Model {
@@ -34,7 +36,16 @@ func (m *Model) Publish(e string) {
 func (m *Model) MovePlayer(rows, cols int) MovementResult {
 	res := m.world.MovePlayer(rows, cols)
 	if res == CreatureOccupying {
+		// Store this for later
+		m.combatLocation = m.world.CurrentRoom().playerLoc.Add(Loc(rows, cols))
 		m.Publish(EnterCombat)
 	}
 	return res
+}
+
+// This is a bit messy, but after successful combat we remember where we just fought
+// (the tile we couldn't move onto because it was occupied), and then we remove the monster
+// that was there and replace it with the player.
+func (m *Model) ReplaceMonsterWithPlayer() {
+	m.world.CurrentRoom().ReplaceMonsterWithPlayer(m.combatLocation)
 }

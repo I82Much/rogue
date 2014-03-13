@@ -222,6 +222,9 @@ func (c *Model) maybeTransition() {
 }
 
 func (c *Model) Update(typed []rune) {
+	// FIXME ndunn take this out
+	c.Publish(AllMonstersDied)
+
 	now := time.Now()
 	for _, r := range typed {
 		c.attempts++

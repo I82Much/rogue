@@ -136,6 +136,13 @@ func (w *Room) RemovePlayer() {
 	w.playerLoc = InvalidLoc
 }
 
+// After combat, we take the place where the monster was formerly occupying
+func (w *Room) ReplaceMonsterWithPlayer(loc Location) {
+	w.creatures[loc.Row][loc.Col] = PlayerCreature
+	w.creatures[w.playerLoc.Row][w.playerLoc.Col] = None
+	w.playerLoc = loc
+}
+
 func (w *Room) Rows() int {
 	return w.rows
 }
