@@ -57,7 +57,7 @@ func NewCombatModel(p *Player, m []*Monster) *Model {
 		Player:   p,
 		words:    allWords,
 		// Player starts off defending against an onslaught of attacks
-		state: Defend,
+		state: Attack,
 	}
 }
 
@@ -151,6 +151,10 @@ func (c *Model) Update(typed []rune) {
 
 				// Done the word
 				if len(c.currentTyping.spelled) == len(c.currentTyping.word) {
+					if c.state == Attack {
+						// Finished typing the word - inflict damage if in attack mode
+						c.DamageMonster(c.currentTyping)
+					}
 					c.KillWord(c.currentTyping)
 					c.completedWords++
 					c.currentTyping = nil
@@ -176,14 +180,10 @@ func (c *Model) Update(typed []rune) {
 		// What proportion (0..1.0) is complete
 		word.proportion = math.DoMap(float64(elapsed.Nanoseconds()), 0.0, float64(word.duration.Nanoseconds()), 0, 1.0)
 
-		// Inflict damage on the player
 		if word.proportion >= 1.0 {
-			if c.state == Attack {
-				c.DamageMonster(word)
-			} else if c.state == Defend {
+			// Inflict damage on the player if in defense mode
+			if c.state == Defend {
 				c.DamagePlayer(word)
-			} else {
-				panic("shouldn't reach here")
 			}
 			toRemove = append(toRemove, word)
 		}

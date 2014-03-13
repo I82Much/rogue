@@ -114,7 +114,9 @@ func (g *Game) Listen(e string) {
 		// Title screen
 	case title.Start, gameover.Restart:
 		g.Stop()
-		c := makeDungeon()
+		// TODO ndunn fix me should be makeDUngeon
+		c := makeCombatModule()
+		//c := makeDungeon()
 		c.AddListener(g)
 		g.curModule = c
 		g.Start()
