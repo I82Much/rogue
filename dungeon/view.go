@@ -2,6 +2,7 @@ package dungeon
 
 import (
 	"fmt"
+	"github.com/I82Much/rogue/render"
 
 	termbox "github.com/nsf/termbox-go"
 )
@@ -49,7 +50,7 @@ func (w *Room) RuneAt(loc Location) rune {
 	return w.TileAt(loc).Rune()
 }
 
-func renderRoom(r *Room) {
+func (v *View) renderRoom(r *Room) {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 	for row := 0; row < r.Rows(); row++ {
 		for col := 0; col < r.Cols(); col++ {
@@ -58,10 +59,14 @@ func renderRoom(r *Room) {
 			termbox.SetCell(col, row, r.RuneAt(location), termbox.ColorDefault, termbox.ColorDefault)
 		}
 	}
+	
+	// Render data about the player
+	player := v.model.player
+	render.Render(player.Name, r.Rows(), 0)
+	render.Render(fmt.Sprintf("%v", player.Stats), r.Rows()+1, 0)
 	termbox.Flush()
 }
 
 func (v *View) Render() {
-
-	renderRoom(v.model.world.CurrentRoom())
+	v.renderRoom(v.model.world.CurrentRoom())
 }
