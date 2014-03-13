@@ -27,7 +27,7 @@ const (
 
 var (
 	// TODO(ndunn): this could shorten each time
-	interRoundTime = time.Duration(1) * time.Second
+	interRoundTime = time.Duration(500) * time.Millisecond
 )
 
 type Model struct {
@@ -188,14 +188,14 @@ func (c *Model) maybeTransition() {
 			panic(fmt.Sprintf("invariant violated: should have had 0 words; had %v", c.words))
 		}
 		c.words = c.getAttackWords()
-		fmt.Printf("entered defense with words %v", c.words)
+		//fmt.Printf("entered defense with words %v", c.words)
 	} else if c.state == EnteringAttack && time.Now().After(c.timeOfTransition) {
 		c.state = Attack
 		if len(c.words) != 0 {
 			panic(fmt.Sprintf("invariant violated: should have had 0 words; had %v", c.words))
 		}
 		c.words = c.getAttackWords()
-		fmt.Printf("entered attack with words %v", c.words)
+		//fmt.Printf("entered attack with words %v", c.words)
 	}
 }
 
