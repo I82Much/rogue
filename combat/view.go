@@ -93,11 +93,24 @@ func (v *View) Render() {
 		if word == v.Model.CurrentlyTyping() {
 			foreground = foreground | termbox.AttrBold
 		}
+		
+		row := 0
+		// TODO(ndunn): render some sort of line to show where the dividing point is
+		numRows := 25
+		// If we're attacking, words are flying up towards the enemies
+		if v.Model.State() == Attack {
+			row = int(math.Lerp(float64(numRows), 0.0, word.proportion))
+		} else if v.Model.State() == Defend {
+			row = int(math.Lerp(0.0, float64(numRows), word.proportion))
+		}
+		
+		// If we're defending, words are flying down towards player
+		
 		for i, c := range word.word {
 			if i < len(word.spelled) {
-				termbox.SetCell(i, word.row, c, termbox.ColorRed|termbox.AttrBold, termbox.ColorDefault)
+				termbox.SetCell(i, row, c, termbox.ColorRed|termbox.AttrBold, termbox.ColorDefault)
 			} else {
-				termbox.SetCell(i, word.row, c, foreground, termbox.ColorDefault)
+				termbox.SetCell(i, row, c, foreground, termbox.ColorDefault)
 			}
 		}
 	}

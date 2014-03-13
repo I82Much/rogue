@@ -14,12 +14,22 @@ const (
 	AllMonstersDied = "MONSTERS_VANQUISHED"
 )
 
+type State string
+const (
+	// Player is attacking
+	Attack State = "ATTACK"
+	// Player is defending
+	Defend State = "DEFEND"
+)
+
 type Model struct {
 	Monsters []*Monster
 	Player   *Player
 
 	words     []*AttackWord
 	listeners []event.Listener
+
+	state State
 
 	attempts       int
 	hits           int
@@ -46,15 +56,17 @@ func NewCombatModel(p *Player, m []*Monster) *Model {
 		Monsters: m,
 		Player:   p,
 		words:    allWords,
+		// Player starts off defending against an onslaught of attacks
+		state: Defend,
 	}
 }
 
 type AttackWord struct {
 	word    string
 	spelled []rune
-	// TODO(ndunn): The row seems like part of view.. not sure though
-	row      int
-	maxRows  int
+	// How much fraction of time has elapsed for this word? Will render differently; e.g. attack could be going up towards
+	// the monsters, defense down towards player
+	proportion float64
 	onScreen time.Time
 	duration time.Duration
 }
@@ -66,7 +78,7 @@ func (w *AttackWord) Damage() int {
 func NewWord(word string, dur time.Duration) *AttackWord {
 	return &AttackWord{
 		word:     word,
-		maxRows:  25,
+		proportion: 0.0,
 		onScreen: time.Now(),
 		duration: dur,
 	}
@@ -96,6 +108,20 @@ func (c *Model) KillWord(w *AttackWord) {
 
 func (c *Model) DamagePlayer(w *AttackWord) {
 	c.Player.Damage(w.Damage())
+}
+
+func (c *Model) DamageMonster(w *AttackWord) {
+	// Pick the first monster that's not dead
+	for _, monster := range c.Monsters {
+		if !monster.IsDead() {
+			monster.Damage(w.Damage())
+		}
+	}
+	
+}
+
+func (c *Model) State() State {
+	return c.state
 }
 
 // Over determines if the fight is over. Meaning either all enemies are dead, or player is dead
@@ -147,12 +173,18 @@ func (c *Model) Update(typed []rune) {
 	var toRemove []*AttackWord
 	for _, word := range c.words {
 		elapsed := now.Sub(word.onScreen)
-		row := math.IntMap(int(elapsed.Nanoseconds()), 0.0, int(word.duration.Nanoseconds()), 0, word.maxRows-1)
-		word.row = row
+		// What proportion (0..1.0) is complete
+		word.proportion = math.DoMap(float64(elapsed.Nanoseconds()), 0.0, float64(word.duration.Nanoseconds()), 0, 1.0)
 
 		// Inflict damage on the player
-		if row > word.maxRows {
-			c.DamagePlayer(word)
+		if word.proportion >= 1.0 {
+			if c.state == Attack {
+				c.DamageMonster(word)
+			} else if c.state == Defend {
+				c.DamagePlayer(word)
+			} else {
+				panic("shouldn't reach here")
+			}
 			toRemove = append(toRemove, word)
 		}
 	}
