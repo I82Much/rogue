@@ -2,7 +2,7 @@ package dungeon
 
 import (
 	"github.com/I82Much/rogue/event"
-	//	"fmt"
+	"github.com/I82Much/rogue/player"
 )
 
 const (
@@ -11,14 +11,16 @@ const (
 
 type Model struct {
 	world     *World
+	player *player.Player
 	listeners []event.Listener
 
 	combatLocation Location
 }
 
-func NewModel(w *World) *Model {
+func NewModel(w *World, p *player.Player) *Model {
 	return &Model{
 		world: w,
+		player: p,
 	}
 }
 
@@ -43,9 +45,3 @@ func (m *Model) MovePlayer(rows, cols int) MovementResult {
 	return res
 }
 
-// This is a bit messy, but after successful combat we remember where we just fought
-// (the tile we couldn't move onto because it was occupied), and then we remove the monster
-// that was there and replace it with the player.
-func (m *Model) ReplaceMonsterWithPlayer() {
-	m.world.CurrentRoom().ReplaceMonsterWithPlayer(m.combatLocation)
-}

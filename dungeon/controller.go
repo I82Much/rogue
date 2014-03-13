@@ -2,6 +2,7 @@ package dungeon
 
 import (
 	"github.com/I82Much/rogue/event"
+	"github.com/I82Much/rogue/player"
 	termbox "github.com/nsf/termbox-go"
 )
 
@@ -19,8 +20,8 @@ func NewController(model *Model, view *View) *Controller {
 	}
 }
 
-func NewModule(w *World) *Controller {
-	model := NewModel(w)
+func NewModule(w *World, p *player.Player) *Controller {
+	model := NewModel(w, p)
 	view := NewView(model)
 	return NewController(model, view)
 }

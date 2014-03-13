@@ -8,15 +8,14 @@ import (
 	"github.com/I82Much/rogue/combat"
 	"github.com/I82Much/rogue/dungeon"
 	"github.com/I82Much/rogue/gameover"
+	"github.com/I82Much/rogue/player"
 	"github.com/I82Much/rogue/title"
 )
 
 type Game struct {
-	// TODO(ndunn): lots of game state here
-
 	curModule Module
-
 	dungeonModule *dungeon.Controller
+	player *player.Player
 }
 
 const (
@@ -46,7 +45,7 @@ func makeCombatModule() Module {
 }
 
 // TODO(ndunn): randomize
-func makeDungeon() *dungeon.Controller {
+func makeDungeon(p *player.Player) *dungeon.Controller {
 	room1 := dungeon.WalledRoom(rows, cols)
 	room1.Spawn(rows/2, cols/2)
 	room1.SpawnMonster()
@@ -91,13 +90,16 @@ func makeDungeon() *dungeon.Controller {
 	}
 	d1_3.Same = d3_1
 	room3.SetDoor(dungeon.Loc(0, cols/2), d3_1)
-	return dungeon.NewModule(world)
+	return dungeon.NewModule(world, p)
 }
 
 func NewGame() *Game {
 	d := title.NewModule()
 	g := &Game{
 		curModule: d,
+		player: &player.Player{
+			Name: "Player 1",
+		},
 	}
 	d.AddListener(g)
 	return g
@@ -118,7 +120,7 @@ func (g *Game) Listen(e string) {
 	// Title screen
 	case title.Start, gameover.Restart:
 		g.Stop()
-		dm := makeDungeon()
+		dm := makeDungeon(g.player)
 		dm.AddListener(g)
 		g.dungeonModule = dm
 		g.curModule = dm
