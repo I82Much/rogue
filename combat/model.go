@@ -15,11 +15,19 @@ const (
 )
 
 type State string
+
 const (
+	EnteringAttack State = "ENTERING_ATTACK"
 	// Player is attacking
-	Attack State = "ATTACK"
+	Attack          State = "ATTACK"
+	EnteringDefense       = "ENTERING_DEFENSE"
 	// Player is defending
-	Defend State = "DEFEND"
+	Defense State = "DEFENSE"
+)
+
+var (
+	// TODO(ndunn): this could shorten each time
+	interRoundTime = time.Duration(1) * time.Second
 )
 
 type Model struct {
@@ -35,6 +43,11 @@ type Model struct {
 	hits           int
 	completedWords int
 	currentTyping  *AttackWord
+
+	// which round of combat
+	round int
+
+	timeOfTransition time.Time
 }
 
 func (m *Model) AddListener(d event.Listener) {
@@ -48,16 +61,12 @@ func (m *Model) Publish(e string) {
 }
 
 func NewCombatModel(p *Player, m []*Monster) *Model {
-	var allWords []*AttackWord
-	for _, m1 := range m {
-		allWords = append(allWords, m1.Words...)
-	}
 	return &Model{
 		Monsters: m,
 		Player:   p,
-		words:    allWords,
 		// Player starts off defending against an onslaught of attacks
-		state: Attack,
+		state:            EnteringAttack,
+		timeOfTransition: time.Now().Add(interRoundTime),
 	}
 }
 
@@ -67,20 +76,20 @@ type AttackWord struct {
 	// How much fraction of time has elapsed for this word? Will render differently; e.g. attack could be going up towards
 	// the monsters, defense down towards player
 	proportion float64
-	onScreen time.Time
-	duration time.Duration
+	onScreen   time.Time
+	duration   time.Duration
 }
 
 func (w *AttackWord) Damage() int {
 	return len(w.word)
 }
 
-func NewWord(word string, dur time.Duration) *AttackWord {
-	return &AttackWord{
-		word:     word,
+func NewWord(word string, dur time.Duration) AttackWord {
+	return AttackWord{
+		word:       word,
 		proportion: 0.0,
-		onScreen: time.Now(),
-		duration: dur,
+		onScreen:   time.Now(),
+		duration:   dur,
 	}
 }
 
@@ -90,6 +99,26 @@ func (c *Model) Words() []*AttackWord {
 
 func (c *Model) CurrentlyTyping() *AttackWord {
 	return c.currentTyping
+}
+
+func (c *Model) getAttackWords() []*AttackWord {
+	var allWords []*AttackWord
+	if c.state == Attack {
+		for _, w := range c.Player.GetWords(c.round) {
+			fmt.Printf("%v\n", w)
+			allWords = append(allWords, &w)
+		}
+	} else if c.state == Defense {
+		for _, m := range c.Monsters {
+			if m.IsDead() {
+				continue
+			}
+			for _, word := range m.GetWords(c.round) {
+				allWords = append(allWords, &word)
+			}
+		}
+	}
+	return allWords
 }
 
 // KillWord removes the word from model, meaning that's it vanquished
@@ -117,7 +146,7 @@ func (c *Model) DamageMonster(w *AttackWord) {
 			monster.Damage(w.Damage())
 		}
 	}
-	
+
 }
 
 func (c *Model) State() State {
@@ -136,6 +165,34 @@ func (c *Model) PublishEndEvents() {
 		}
 	}
 	c.Publish(AllMonstersDied)
+}
+
+// maybeTransition potentially shifts the model into another phase. e.g. after all the words are done in combat round,
+// we enter the EnteringDefense round.
+// The transitions are from
+// EnteringDefense -> Defense -> EnteringAttack -> Attack -> EnteringDefense and on and on.
+func (c *Model) maybeTransition() {
+	if c.state == Defense && len(c.words) == 0 {
+		c.state = EnteringAttack
+		c.timeOfTransition = time.Now().Add(interRoundTime)
+	} else if c.state == Attack && len(c.words) == 0 {
+		c.state = EnteringDefense
+		c.timeOfTransition = time.Now().Add(interRoundTime)
+	} else if c.state == EnteringDefense && time.Now().After(c.timeOfTransition) {
+		c.state = Defense
+		if len(c.words) != 0 {
+			panic(fmt.Sprintf("invariant violated: should have had 0 words; had %v", c.words))
+		}
+		c.words = c.getAttackWords()
+		fmt.Printf("entered defense with words %v", c.words)
+	} else if c.state == EnteringAttack && time.Now().After(c.timeOfTransition) {
+		c.state = Attack
+		if len(c.words) != 0 {
+			panic(fmt.Sprintf("invariant violated: should have had 0 words; had %v", c.words))
+		}
+		c.words = c.getAttackWords()
+		fmt.Printf("entered attack with words %v", c.words)
+	}
 }
 
 func (c *Model) Update(typed []rune) {
@@ -182,7 +239,7 @@ func (c *Model) Update(typed []rune) {
 
 		if word.proportion >= 1.0 {
 			// Inflict damage on the player if in defense mode
-			if c.state == Defend {
+			if c.state == Defense {
 				c.DamagePlayer(word)
 			}
 			toRemove = append(toRemove, word)
@@ -192,5 +249,8 @@ func (c *Model) Update(typed []rune) {
 		c.KillWord(word)
 	}
 
-	c.PublishEndEvents()
+	// Transition phases
+	c.maybeTransition()
+
+	//c.PublishEndEvents()
 }

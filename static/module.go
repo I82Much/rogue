@@ -2,17 +2,17 @@
 package static
 
 import (
-	termbox "github.com/nsf/termbox-go"
 	"github.com/I82Much/rogue/event"
 	"github.com/I82Much/rogue/render"
+	termbox "github.com/nsf/termbox-go"
 )
 
 type Module struct {
 	contents string
 	// The event that should be published if the given rune is pressed
-	keyMap map[rune]string 
+	keyMap    map[rune]string
 	listeners []event.Listener
-	running bool
+	running   bool
 }
 
 func (s *Module) AddListener(d event.Listener) {
@@ -20,9 +20,9 @@ func (s *Module) AddListener(d event.Listener) {
 }
 
 func NewModule(contents string, keyMap map[rune]string) *Module {
-	return &Module {
+	return &Module{
 		contents: contents,
-		keyMap: keyMap,
+		keyMap:   keyMap,
 	}
 }
 
@@ -59,5 +59,3 @@ func (s *Module) input() {
 		s.publish(pubEvent)
 	}
 }
-
-

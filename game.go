@@ -2,12 +2,12 @@ package rogue
 
 import (
 	"fmt"
-	"time"
+	//	"time"
 
 	"github.com/I82Much/rogue/combat"
 	"github.com/I82Much/rogue/dungeon"
-	"github.com/I82Much/rogue/title"
 	"github.com/I82Much/rogue/gameover"
+	"github.com/I82Much/rogue/title"
 )
 
 type Game struct {
@@ -25,18 +25,18 @@ const (
 func makeCombatModule() Module {
 	player := combat.NewPlayer(20)
 	m1 := combat.NewMonster(10)
-	m1.Words = []*combat.AttackWord{
+	/*m1.Words = []*combat.AttackWord{
 		combat.NewWord("Hello", time.Duration(3)*time.Second),
-		combat.NewWord("Supercalifragilistic", time.Duration(10)*time.Second),
-	}
+		combat.NewWord("Supercalifragilistic", time.Duration(2)*time.Second),
+	}*/
 	m2 := combat.NewMonster(50)
-	m2.Words = []*combat.AttackWord{
+	/*m2.Words = []*combat.AttackWord{
 		combat.NewWord("World", time.Duration(1)*time.Second),
 		combat.NewWord("Blah", time.Duration(2)*time.Second),
 		combat.NewWord("BlahBlah", time.Duration(2)*time.Second),
-		combat.NewWord("Aasdfasdfasdfasdfasdfasdfasdf", time.Duration(10)*time.Second),
+		combat.NewWord("Aasdfasdfasdfasdfasdfasdfasdf", time.Duration(3)*time.Second),
 		combat.NewWord("Foo", time.Duration(1)*time.Second),
-	}
+	}*/
 
 	module := combat.NewModule(player, []*combat.Monster{m1, m2})
 	return module
@@ -111,7 +111,7 @@ func (g *Game) Stop() {
 // Listen handles the state transitions between the different modules.
 func (g *Game) Listen(e string) {
 	switch e {
-		// Title screen
+	// Title screen
 	case title.Start, gameover.Restart:
 		g.Stop()
 		// TODO ndunn fix me should be makeDUngeon
@@ -127,7 +127,7 @@ func (g *Game) Listen(e string) {
 		c.AddListener(g)
 		g.curModule = c
 		g.Start()
-		
+
 		// Combat
 	case combat.PlayerDied:
 		g.Stop()
