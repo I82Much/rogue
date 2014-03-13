@@ -15,7 +15,7 @@ type Monster struct {
 var (
 	// FIXME this is a hack
 	words = map[int][]string{
-		0: []string{"grunt", "GRRUUUUNT", "hello"},
+		0: []string{"grunt", "hRRUUUUNT", "jello"},
 		1: []string{"no way", "jose", "as.."},
 	}
 )

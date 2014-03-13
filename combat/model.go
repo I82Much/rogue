@@ -2,6 +2,7 @@ package combat
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/I82Much/rogue/event"
@@ -126,6 +127,10 @@ func (c *Model) getAttackWords() []*AttackWord {
 // KillWord removes the word from model, meaning that's it vanquished
 func (c *Model) KillWord(w *AttackWord) {
 	// TODO(ndunn): score? update exp?
+	if c.currentTyping == w {
+		log.Printf("no longer typing %v", c.currentTyping)
+		c.currentTyping = nil
+	}
 	for i, word := range c.words {
 		if word == w {
 			c.words = append(c.words[0:i], c.words[i+1:]...)
@@ -175,11 +180,9 @@ func (c *Model) PublishEndEvents() {
 // EnteringDefense -> Defense -> EnteringAttack -> Attack -> EnteringDefense and on and on.
 func (c *Model) maybeTransition() {
 	if c.state == Defense && len(c.words) == 0 {
-		c.currentTyping = nil
 		c.state = EnteringAttack
 		c.timeOfTransition = time.Now().Add(interRoundTime)
 	} else if c.state == Attack && len(c.words) == 0 {
-		c.currentTyping = nil
 		c.state = EnteringDefense
 		c.timeOfTransition = time.Now().Add(interRoundTime)
 	} else if c.state == EnteringDefense && time.Now().After(c.timeOfTransition) {
@@ -205,27 +208,31 @@ func (c *Model) Update(typed []rune) {
 		c.attempts++
 		// Does this rune represent the first untyped letter of any of the candidates? If so it's a hit. If not it's a miss
 		if c.currentTyping != nil {
+			log.Printf("Currently typing: %v", *c.currentTyping)
 			runes := []rune(c.currentTyping.word)
 			if r == runes[len(c.currentTyping.spelled)] {
 				c.hits++
 				c.currentTyping.spelled = append(c.currentTyping.spelled, r)
+				log.Printf("spelled %v", c.currentTyping.spelled)
 
 				// Done the word
 				if len(c.currentTyping.spelled) == len(c.currentTyping.word) {
+					log.Printf("finished %v", c.currentTyping.word)
 					if c.state == Attack {
 						// Finished typing the word - inflict damage if in attack mode
 						c.DamageMonster(c.currentTyping)
 					}
 					c.KillWord(c.currentTyping)
 					c.completedWords++
-					c.currentTyping = nil
 				}
 			}
 		} else {
+			log.Printf("new letter %v", r)
 			// See if the rune matches first letter of one of our candidate words
 			for _, word := range c.Words() {
 				runes := []rune(word.word)
 				if r == runes[len(word.spelled)] {
+					log.Printf("started typing %v", word.word)
 					c.hits++
 					word.spelled = append(word.spelled, r)
 					c.currentTyping = word

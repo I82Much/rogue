@@ -13,7 +13,7 @@ type Player struct {
 var (
 	// FIXME this is a hack
 	playerWords = map[int][]string{
-		0: []string{"foo", "baaaaaar", "bazaarararararar"},
+		0: []string{"foo", "baaaaaar", "cazaarararararar"},
 		1: []string{"avast", "ye matey", "shiver me timbers"},
 	}
 )
