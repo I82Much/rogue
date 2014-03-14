@@ -1,4 +1,4 @@
-package combat
+package player
 
 import (
 	"testing"

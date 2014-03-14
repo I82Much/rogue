@@ -64,7 +64,7 @@ func (v *View) renderRoom(r *Room) {
 	player := v.model.player
 	render.Render(player.Name, r.Rows(), 0)
 	// Health
-	render.Render(fmt.Sprintf("%d/%d health", player.Current, player.Max), r.Rows()+1, 0)
+	render.Render(fmt.Sprintf("%d/%d health", player.CurrentLife, player.MaxLife), r.Rows()+1, 0)
 	render.Render(fmt.Sprintf("%v", player.Stats), r.Rows()+2, 0)
 	termbox.Flush()
 }

@@ -25,7 +25,6 @@ const (
 
 // TODO(ndunn): this needs to be pulled out of the world
 func makeCombatModule(p *player.Player) Module {
-	player := combat.NewPlayer(int(p.Current), int(p.Max))
 	m1 := combat.NewMonster(5)
 	/*m1.Words = []*combat.AttackWord{
 		combat.NewWord("Hello", time.Duration(3)*time.Second),
@@ -40,7 +39,7 @@ func makeCombatModule(p *player.Player) Module {
 		combat.NewWord("Foo", time.Duration(1)*time.Second),
 	}*/
 
-	module := combat.NewModule(player, []*combat.Monster{m1, m2})
+	module := combat.NewModule(p, []*combat.Monster{m1, m2})
 	return module
 }
 

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/I82Much/rogue/event"
+	"github.com/I82Much/rogue/player"
 	termbox "github.com/nsf/termbox-go"
 )
 
@@ -19,7 +20,7 @@ type Controller struct {
 	runesMutex sync.Mutex
 }
 
-func NewModule(player *Player, monsters []*Monster) *Controller {
+func NewModule(player *player.Player, monsters []*Monster) *Controller {
 	model := NewCombatModel(player, monsters)
 	view := &View{
 		Model: model,

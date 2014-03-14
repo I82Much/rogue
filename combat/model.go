@@ -7,6 +7,7 @@ import (
 
 	"github.com/I82Much/rogue/event"
 	"github.com/I82Much/rogue/math"
+	"github.com/I82Much/rogue/player"
 	termbox "github.com/nsf/termbox-go"
 )
 
@@ -41,7 +42,7 @@ var (
 
 type Model struct {
 	Monsters []*Monster
-	Player   *Player
+	Player   *player.Player
 
 	words     []*AttackWord
 	listeners []event.Listener
@@ -69,7 +70,7 @@ func (m *Model) Publish(e string) {
 	}
 }
 
-func NewCombatModel(p *Player, m []*Monster) *Model {
+func NewCombatModel(p *player.Player, m []*Monster) *Model {
 	return &Model{
 		Monsters: m,
 		Player:   p,
@@ -122,7 +123,8 @@ func (c *Model) CurrentlyTyping() *AttackWord {
 func (c *Model) getAttackWords() []*AttackWord {
 	var allWords []*AttackWord
 	if c.state == Attack {
-		for _, w := range c.Player.GetWords(c.round) {
+		// TODO(ndunn): The attacking words should also somehow be based on the monster's we're attacking
+		for _, w := range GetWords(c.round) {
 			w := w
 			//fmt.Printf("%v\n", w)
 			allWords = append(allWords, &w)
@@ -223,7 +225,7 @@ func (c *Model) maybeTransition() {
 
 func (c *Model) Update(typed []rune) {
 	// FIXME ndunn take this out
-	c.Publish(AllMonstersDied)
+	//c.Publish(AllMonstersDied)
 
 	now := time.Now()
 	for _, r := range typed {

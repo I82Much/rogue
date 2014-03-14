@@ -4,21 +4,27 @@ type Stats struct {
 	MonstersDefeated int
 }
 
-type Life int
-
 type Player struct {
-	Name    string
-	Current Life
-	Max     Life
-	Level   int
-	Stats   Stats
+	Name        string
+	CurrentLife int
+	MaxLife     int
+	Level       int
+	Stats       Stats
 }
 
 func WithName(n string) *Player {
 	return &Player{
-		Name:    n,
-		Current: 100,
-		Max:     100,
-		Level:   1,
+		Name:        n,
+		CurrentLife: 100,
+		MaxLife:     100,
+		Level:       1,
 	}
+}
+
+func (p *Player) IsDead() bool {
+	return p.CurrentLife <= 0
+}
+
+func (p *Player) Damage(life int) {
+	p.CurrentLife -= life
 }

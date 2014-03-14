@@ -5,11 +5,6 @@ import (
 	"time"
 )
 
-type Player struct {
-	MaxLife int
-	Life    int
-}
-
 var (
 	// FIXME this is a hack
 	playerWords = map[int][]string{
@@ -18,22 +13,7 @@ var (
 	}
 )
 
-func NewPlayer(cur, max int) *Player {
-	return &Player{
-		MaxLife: max,
-		Life:    cur,
-	}
-}
-
-func (p *Player) IsDead() bool {
-	return p.Life <= 0
-}
-
-func (p *Player) Damage(life int) {
-	p.Life -= life
-}
-
-func (p *Player) GetWords(round int) []AttackWord {
+func GetWords(round int) []AttackWord {
 	w := playerWords[round]
 	var res []AttackWord
 	for i, word := range w {
