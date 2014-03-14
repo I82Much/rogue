@@ -48,6 +48,8 @@ func AttackWords(phrases []string, wordsPerMinute int, delay time.Duration) []*A
 	if wordsPerMinute <= 0 {
 		panic(fmt.Sprintf("need wpm > 0; got %d", wordsPerMinute))
 	}
+	
+	log.Printf("attack words phrases %v wpm %d delay %v", phrases, wordsPerMinute, delay)
 
 	var totalDelay = delay
 	var attacks []*AttackWord
@@ -56,12 +58,12 @@ func AttackWords(phrases []string, wordsPerMinute int, delay time.Duration) []*A
 	for _, phrase := range phrases {
 		chars := len(phrase)
 		minutes := float32(chars) / float32(cpm)
-		seconds := minutes / 60.0
+		seconds := minutes * 60.0
 		timeOnScreen := time.Duration(int(1000*seconds)) * time.Millisecond
 
 		attack := NewWord(phrase, timeOnScreen, totalDelay)
 
-		log.Printf("adding attack word %v", attack)
+		log.Printf("adding attack word %v; total time on screen %v", attack, timeOnScreen.Seconds())
 
 		attacks = append(attacks, &attack)
 
