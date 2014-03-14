@@ -80,7 +80,6 @@ func NewCombatModel(p *player.Player, m []*Monster) *Model {
 	}
 }
 
-
 func (c *Model) Words() []*AttackWord {
 	return c.words
 }
@@ -107,7 +106,7 @@ func (c *Model) getAttackWords() []*AttackWord {
 				word := word
 				// Change the column that the word falls from based on which monster it is.
 				word.Col = columns[i%len(columns)]
-				allWords = append(allWords, &word)
+				allWords = append(allWords, word)
 			}
 		}
 	}
@@ -169,13 +168,16 @@ func (c *Model) PublishEndEvents() {
 // EnteringDefense -> Defense -> EnteringAttack -> Attack -> EnteringDefense and on and on.
 func (c *Model) maybeTransition() {
 	if c.state == Defense && len(c.words) == 0 {
+		log.Println("defense -> entering attack")
 		c.state = EnteringAttack
 		c.timeOfTransition = time.Now().Add(interRoundTime)
 	} else if c.state == Attack && len(c.words) == 0 {
+		log.Println("attack -> entering defense")
 		c.state = EnteringDefense
 		c.timeOfTransition = time.Now().Add(interRoundTime)
 		c.round++
 	} else if c.state == EnteringDefense && time.Now().After(c.timeOfTransition) {
+		log.Println("entering defense -> defense")
 		c.state = Defense
 		if len(c.words) != 0 {
 			panic(fmt.Sprintf("invariant violated: should have had 0 words; had %v", c.words))
@@ -183,6 +185,7 @@ func (c *Model) maybeTransition() {
 		c.words = c.getAttackWords()
 		//fmt.Printf("entered defense with words %v", c.words)
 	} else if c.state == EnteringAttack && time.Now().After(c.timeOfTransition) {
+		log.Println("entering attack -> attack")
 		c.state = Attack
 		if len(c.words) != 0 {
 			panic(fmt.Sprintf("invariant violated: should have had 0 words; had %v", c.words))

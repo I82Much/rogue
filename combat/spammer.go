@@ -1,7 +1,7 @@
 package combat
 
 var (
-	spammerPhrases = []string {
+	spammerPhrases = []string{
 		"viagra",
 		"enlargement",
 		"nice tax credit",
@@ -54,10 +54,9 @@ var (
 		"limited time",
 		"legal",
 		"stainless steel",
-		
-		
-		
-		
 	}
-
 )
+
+func spammerWordFunc(round int) []string {
+	return chooseNRandomly(spammerPhrases, round+1)
+}

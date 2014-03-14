@@ -2,7 +2,7 @@ package combat
 
 var (
 	// a mix of things I find myself doing with annoying things I see others doing. Some link-bait type stuff in the mix as well.
-	bloggerPhrases = []string {
+	bloggerPhrases = []string{
 		"clearly",
 		"absolutely",
 		"in my opinion",
@@ -34,3 +34,7 @@ var (
 		"vlog",
 	}
 )
+
+func bloggerWordFunc(round int) []string {
+	return chooseNRandomly(bloggerPhrases, round+1)
+}

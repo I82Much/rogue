@@ -4,7 +4,7 @@
 package combat
 
 var (
-	scammerPhrases = []string {
+	scammerPhrases = []string{
 		"from the desk of barrister",
 		"your assistance is needed",
 		"I am seeking for a reliable person",
@@ -18,3 +18,7 @@ var (
 		"Western Union",
 	}
 )
+
+func scammerWordFunc(round int) []string {
+	return chooseNRandomly(scammerPhrases, round+1)
+}

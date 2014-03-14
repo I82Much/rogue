@@ -11,7 +11,7 @@ import (
 
 func main() {
 
-	f, err := os.OpenFile("testlogfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	f, err := os.OpenFile("testlogfile2", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		panic(fmt.Sprintf("error opening file: %v", err))
 	}
@@ -27,5 +27,6 @@ func main() {
 	defer termbox.Close()
 
 	game := rogue.NewGame()
+	log.Println("starting game")
 	game.Start()
 }

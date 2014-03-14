@@ -22,5 +22,5 @@ func TestMakeHaxor(t *testing.T) {
 	for _, word := range words {
 		fmt.Printf("%v -> %v\n", word, makeHaxor(word))
 	}
-	
+
 }

@@ -10,6 +10,7 @@ type Player struct {
 	MaxLife     int
 	Level       int
 	Stats       Stats
+	MaxWPM      int
 }
 
 func WithName(n string) *Player {
@@ -18,6 +19,8 @@ func WithName(n string) *Player {
 		CurrentLife: 100,
 		MaxLife:     100,
 		Level:       1,
+		// FIXME
+		MaxWPM: 60,
 	}
 }
 

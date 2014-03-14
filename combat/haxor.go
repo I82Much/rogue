@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	haxorWords = []string {
+	haxorWords = []string{
 		"l33t",
 		"1337",
 		"n00b",
@@ -27,12 +27,11 @@ var (
 		"Pr0n",
 		"OMFG",
 		"roxxorz",
-		
 	}
 )
 
 // randS randomly chooses from given strings
-func randS(s ... string) string {
+func randS(s ...string) string {
 	return s[rand.Int31n(int32(len(s)))]
 }
 
@@ -46,31 +45,37 @@ func maybeReplaceSuffix(word, suffix string, replacements []string) string {
 }
 
 func makeHaxor(w string) string {
-	s := func(s1 ... string) []string {
+	s := func(s1 ...string) []string {
 		return s1
 	}
-	replacementDict := map[string][]string {
+	replacementDict := map[string][]string{
 		"e": s("3"),
 		"t": s("7"),
 		"l": s("1"),
 		"o": s("0"),
 	}
 	// ed -> d, t, or 3d
-	w = maybeReplaceSuffix(w, "ed", s("d","t", "3d"))
-	
+	w = maybeReplaceSuffix(w, "ed", s("d", "t", "3d"))
+
 	// and, anned, ant -> &
 	w = maybeReplaceSuffix(w, "and", s("&"))
 	w = maybeReplaceSuffix(w, "anned", s("&"))
 	w = maybeReplaceSuffix(w, "ant", s("&"))
-		
+
 	// Make random replacements; sometimes the random choice is to leave the letter alone.
 	for orig, replacementStrings := range replacementDict {
 		replacement := randS(replacementStrings...)
 		w = strings.Replace(w, orig, replacement, -1)
 	}
-	
+
 	// Maybe add -zorz, age, or xor
 	w = maybeReplaceSuffix(w, "", s("", "zorz", "age", "xor"))
-	
+
 	return w
+}
+
+func haxorWordFunc(round int) []string {
+	// Just for fun we'll use the other monster's words too
+	// FIXME if we have time convert the words from blogger etc
+	return chooseNRandomly(haxorWords, round+1)
 }

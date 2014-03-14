@@ -2,6 +2,8 @@ package combat
 
 import (
 	"fmt"
+	"log"
+	"math/rand"
 	"time"
 )
 
@@ -12,7 +14,6 @@ import (
 
 // The difficulty is based on how fast the words move off the screen; the faster they move, the less time the player has to react or
 // complete typing the word.
-
 
 type AttackWord struct {
 	word    string
@@ -39,10 +40,10 @@ func NewWord(word string, dur time.Duration, initialDelay time.Duration) AttackW
 }
 
 // phrases - the phrases to convert into the attacks
-// words per minute - target number of words per minute. Assumes 5 characters per word, 
+// words per minute - target number of words per minute. Assumes 5 characters per word,
 // including spaces and punctuation (see wikipedia en.m.wikipedia.org/wiki/Words_per_minute)
-// delay - how much extra time should be inserted between launches of attacks? 
-// TODO(ndunn): 
+// delay - how much extra time should be inserted between launches of attacks?
+// TODO(ndunn):
 func AttackWords(phrases []string, wordsPerMinute int, delay time.Duration) []*AttackWord {
 	if wordsPerMinute <= 0 {
 		panic(fmt.Sprintf("need wpm > 0; got %d", wordsPerMinute))
@@ -56,15 +57,31 @@ func AttackWords(phrases []string, wordsPerMinute int, delay time.Duration) []*A
 		chars := len(phrase)
 		minutes := float32(chars) / float32(cpm)
 		seconds := minutes / 60.0
-		timeOnScreen := time.Duration(int(1000 * seconds)) * time.Millisecond
-		
+		timeOnScreen := time.Duration(int(1000*seconds)) * time.Millisecond
+
 		attack := NewWord(phrase, timeOnScreen, totalDelay)
+
+		log.Printf("adding attack word %v", attack)
+
 		attacks = append(attacks, &attack)
-		
+
 		// FIXME should be able to have some overlap on the screen
 		totalDelay = time.Duration(totalDelay.Nanoseconds() + delay.Nanoseconds() + timeOnScreen.Nanoseconds())
 	}
 	return attacks
+}
+
+func chooseNRandomly(candidates []string, n int) []string {
+	if n > len(candidates) {
+		panic("not set up that way")
+	}
+	indices := rand.Perm(len(candidates))
+	var res []string
+	for i := 0; i < n; i++ {
+		index := indices[i]
+		res = append(res, candidates[index])
+	}
+	return res
 }
 
 func (w *AttackWord) Damage() int {
