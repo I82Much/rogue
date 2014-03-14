@@ -145,6 +145,7 @@ func (c *Model) DamageMonster(w *AttackWord) {
 	for _, monster := range c.Monsters {
 		if !monster.IsDead() {
 			monster.Damage(w.Damage())
+			return
 		}
 	}
 }
