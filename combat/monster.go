@@ -50,9 +50,18 @@ func (m *Monster) Damage(life int) {
 	m.Life -= life
 }
 
-func (p *Monster) GetWords(round int) []*AttackWord {
-	words := wordGenMap[p.Type](round)
+func getWords(round int, t MonsterType, wpm int) []*AttackWord {
+	words := wordGenMap[t](round)
 	// TODO what should the delay be
-	log.Printf("monster %v round %d words: %v", *p, round, words)
-	return AttackWords(words, p.WordsPerMinute, time.Duration(rand.Int31n(2000)) * time.Millisecond)
+	log.Printf("monster %v round %d words: %v", t, round, words)
+	
+	// The l33t speak is realllly hard to type. Give the player a break
+	if t == Haxor {
+		wpm = int(0.7 * float32(wpm))
+	}
+	return AttackWords(words, wpm, time.Duration(rand.Int31n(2000)) * time.Millisecond)
+}
+
+func (p *Monster) GetWords(round int) []*AttackWord {
+	return getWords(round, p.Type, p.WordsPerMinute)
 }

@@ -88,15 +88,20 @@ func (c *Model) CurrentlyTyping() *AttackWord {
 	return c.currentTyping
 }
 
+func (c *Model) getPlayerAttackWords(round int) []*AttackWord{
+	for _, m := range c.Monsters {
+		if m.IsDead() {
+			continue
+		}
+		return m.GetWords(round)
+	}
+	return nil
+}
+
 func (c *Model) getAttackWords() []*AttackWord {
 	var allWords []*AttackWord
 	if c.state == Attack {
-		// TODO(ndunn): The attacking words should also somehow be based on the monster's we're attacking
-		for _, w := range GetWords(c.round) {
-			w := w
-			//fmt.Printf("%v\n", w)
-			allWords = append(allWords, &w)
-		}
+		allWords = c.getPlayerAttackWords(c.round)
 	} else if c.state == Defense {
 		for i, m := range c.Monsters {
 			if m.IsDead() {

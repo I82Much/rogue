@@ -61,6 +61,14 @@ func AttackWords(phrases []string, wordsPerMinute int, delay time.Duration) []*A
 		seconds := minutes * 60.0
 		timeOnScreen := time.Duration(int(1000*seconds)) * time.Millisecond
 
+		// This is a hack. Oh well it makes the game more fun
+		if chars < 6 {
+			timeOnScreen = time.Duration(2*timeOnScreen.Nanoseconds()) * time.Nanosecond
+		} else if chars < 8 {
+			timeOnScreen = time.Duration(int(1.5*float32(timeOnScreen.Nanoseconds()))) * time.Nanosecond
+		}
+
+
 		attack := NewWord(phrase, timeOnScreen, totalDelay)
 
 		log.Printf("adding attack word %v; total time on screen %v", attack, timeOnScreen.Seconds())
