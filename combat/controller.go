@@ -43,6 +43,11 @@ func (c *Controller) input() {
 		if event.Key == termbox.KeyCtrlC {
 			c.Stop()
 		}
+		if event.Key == termbox.KeySpace {
+			c.runesMutex.Lock()
+			c.unprocessedRunes = append(c.unprocessedRunes, ' ')
+			c.runesMutex.Unlock()
+		}
 		// They typed a letter
 		if event.Ch != 0 {
 			c.runesMutex.Lock()

@@ -2,6 +2,7 @@ package combat
 
 import (
 	"log"
+	"math/rand"
 	"time"
 )
 
@@ -53,5 +54,5 @@ func (p *Monster) GetWords(round int) []*AttackWord {
 	words := wordGenMap[p.Type](round)
 	// TODO what should the delay be
 	log.Printf("monster %v round %d words: %v", *p, round, words)
-	return AttackWords(words, p.WordsPerMinute, time.Duration(0))
+	return AttackWords(words, p.WordsPerMinute, time.Duration(rand.Int31n(2000)) * time.Millisecond)
 }
