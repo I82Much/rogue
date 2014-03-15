@@ -15,6 +15,8 @@ const (
 	Floor Tile = iota
 	Wall
 	DoorTile
+	Water
+	Bridge
 
 	// Creatures
 	None Creature = iota
@@ -211,12 +213,6 @@ func (w *Room) CanMoveTo(loc Location) MovementResult {
 	return Move
 }
 
-func (t Tile) Passable() bool {
-	if t == Floor || t == DoorTile {
-		return true
-	}
-	return false
-}
 
 func (m MovementResult) String() string {
 	switch m {

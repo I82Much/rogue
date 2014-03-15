@@ -68,6 +68,11 @@ func makeDungeon(p *player.Player) *dungeon.Controller {
 	room1.SpawnMonster()
 	room1.SpawnMonster()
 
+	room1.SetTile(dungeon.Loc(1, 2), dungeon.Water)
+	room1.SetTile(dungeon.Loc(2, 2), dungeon.Water)
+	room1.SetTile(dungeon.Loc(3, 2), dungeon.Bridge)
+	room1.SetTile(dungeon.Loc(4, 2), dungeon.Water)
+
 	// 2nd room to east of room 1
 	room2 := dungeon.WalledRoom(rows, cols)
 
@@ -141,17 +146,18 @@ func (g *Game) restart() {
 
 	// Fixme this should be the dungeon not combat
 
-	/*
-		dm := makeDungeon(g.player)
-		dm.AddListener(g)
-		g.dungeonModule = dm
-		g.curModule = dm
-		g.Start()*/
+	
+	dm := makeDungeon(g.player)
+	dm.AddListener(g)
+	g.dungeonModule = dm
+	g.curModule = dm
+	g.Start()
 
+	/*
 	c := makeCombatModule(g.player)
 	c.AddListener(g)
 	g.curModule = c
-	g.Start()
+	g.Start()*/
 }
 
 // Listen handles the state transitions between the different modules.

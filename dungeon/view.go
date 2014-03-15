@@ -17,6 +17,14 @@ func NewView(m *Model) *View {
 	}
 }
 
+func (t Tile) Passable() bool {
+	switch t {
+	case Floor, DoorTile, Bridge:
+		return true
+	}
+	return false
+}
+
 func (t Tile) Rune() rune {
 	switch t {
 	case Floor:
@@ -25,9 +33,31 @@ func (t Tile) Rune() rune {
 		return '*'
 	case DoorTile:
 		return 'D'
+	case Water:
+		return '░'
+	case Bridge:
+		return '█'
 	default:
 		panic(fmt.Sprintf("unknown tile type %v", t))
 	}
+}
+
+func (t Tile) Foreground() termbox.Attribute {
+	switch t {
+	case Water:
+		return termbox.ColorWhite
+	case Bridge:
+		return termbox.ColorYellow
+	}
+	return termbox.ColorDefault
+}
+
+func (t Tile) Background() termbox.Attribute {
+	switch t {
+	case Water:
+		return termbox.ColorBlue
+	}
+	return termbox.ColorDefault
 }
 
 func (c Creature) Rune() rune {
@@ -43,11 +73,27 @@ func (c Creature) Rune() rune {
 	}
 }
 
-func (w *Room) RuneAt(loc Location) rune {
+type cell struct {
+	r rune
+	fg termbox.Attribute
+	bg termbox.Attribute
+}
+
+
+func (w *Room) CellForLoc(loc Location) cell {
 	if c := w.CreatureAt(loc); c != None {
-		return c.Rune()
+		return cell {
+			r: c.Rune(),
+			fg: termbox.ColorDefault, 
+			bg: termbox.ColorDefault,
+		}
 	}
-	return w.TileAt(loc).Rune()
+	t := w.TileAt(loc)
+	return cell {
+		r: t.Rune(),
+		fg: t.Foreground(),
+		bg: t.Background(),
+	}
 }
 
 func (v *View) renderRoom(r *Room) {
@@ -56,7 +102,8 @@ func (v *View) renderRoom(r *Room) {
 		for col := 0; col < r.Cols(); col++ {
 			// col = x, row = y
 			location := Loc(row, col)
-			termbox.SetCell(col, row, r.RuneAt(location), termbox.ColorDefault, termbox.ColorDefault)
+			cell := r.CellForLoc(location)
+			termbox.SetCell(col, row, cell.r, cell.fg, cell.bg)
 		}
 	}
 
