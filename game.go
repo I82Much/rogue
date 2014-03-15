@@ -17,27 +17,26 @@ type Game struct {
 	curModule     Module
 	dungeonModule *dungeon.Controller
 	player        *player.Player
-	playerWpm int
+	playerWpm     int
 }
-
 
 const (
 	rows = 16
 	cols = 32
-	
-	EasyWpm = 15
-	MediumWpm = 40
-	HardWpm = 70
-	InsaneWpm = 100
+
+	EasyWpm         = 15
+	MediumWpm       = 40
+	HardWpm         = 70
+	InsaneWpm       = 100
 	StenographerWpm = 300
 )
 
 var (
-	difficultyMap = map[string]int {
-		title.Easy: EasyWpm,
-		title.Medium: MediumWpm,
-		title.Hard: HardWpm,
-		title.Insane: InsaneWpm,
+	difficultyMap = map[string]int{
+		title.Easy:         EasyWpm,
+		title.Medium:       MediumWpm,
+		title.Hard:         HardWpm,
+		title.Insane:       InsaneWpm,
 		title.Stenographer: StenographerWpm,
 	}
 )
@@ -139,7 +138,7 @@ func (g *Game) setWpm(wpm int) {
 func (g *Game) restart() {
 	g.Stop()
 	g.player = player.WithName("Player 1", g.playerWpm)
-	
+
 	// Fixme this should be the dungeon not combat
 
 	/*

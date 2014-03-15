@@ -89,13 +89,18 @@ func (c *Model) CurrentlyTyping() *AttackWord {
 }
 
 func (c *Model) getPlayerAttackWords(round int) []*AttackWord {
+
+	// Alternate between all of the alive monsters. e.g. round 1 pick first. Round 2, second. etc.
+	var aliveMonsters []*Monster
 	for _, m := range c.Monsters {
-		if m.IsDead() {
-			continue
+		if !m.IsDead() {
+			aliveMonsters = append(aliveMonsters, m)
 		}
-		return m.GetWords(round)
 	}
-	return nil
+	if len(aliveMonsters) == 0 {
+		panic("Invariant broken- there should be at least one alive monster")
+	}
+	return aliveMonsters[round%len(aliveMonsters)].GetWords(round)
 }
 
 func (c *Model) getAttackWords() []*AttackWord {

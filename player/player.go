@@ -19,7 +19,7 @@ func WithName(n string, wpm int) *Player {
 		CurrentLife: 100,
 		MaxLife:     100,
 		Level:       1,
-		MaxWPM: wpm,
+		MaxWPM:      wpm,
 	}
 }
 

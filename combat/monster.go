@@ -4,7 +4,7 @@ import (
 	"log"
 	"math/rand"
 	"time"
-	
+
 	"github.com/I82Much/rogue/monster"
 )
 

@@ -25,12 +25,12 @@ ___________                         __________
 		  'q' to Quit
 `
 
-	Easy = "START_EASY"
-	Medium = "START_MEDIUM"
-	Hard = "START_HARD"
-	Insane = "START_INSANE"
+	Easy         = "START_EASY"
+	Medium       = "START_MEDIUM"
+	Hard         = "START_HARD"
+	Insane       = "START_INSANE"
 	Stenographer = "START_STENOGRAPHER"
-	Quit  = "QUIT"
+	Quit         = "QUIT"
 )
 
 func NewModule() *static.Module {
