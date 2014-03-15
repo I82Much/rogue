@@ -6,12 +6,27 @@ import (
 	"strings"
 
 	"github.com/I82Much/rogue/math"
+	"github.com/I82Much/rogue/static"
 	termbox "github.com/nsf/termbox-go"
 )
 
 type View struct {
 	Model *Model
 	rows  int
+	description renderer
+}
+
+type renderer interface {
+	Render()
+}
+
+
+func NewView(m *Model, rows int) *View {
+	return &View {
+		Model: m,
+		rows: rows,
+		description: initModule(m),
+	}
 }
 
 func columnOffset(w *AttackWord) int {
@@ -28,8 +43,29 @@ func columnOffset(w *AttackWord) int {
 	}
 }
 
-// Render assumes that termbox has already been initialized.
-func (v *View) Render() {
+func initModule(m *Model) renderer {
+	var monsterMap = make(map[string]int)
+	for _, monster := range m.Monsters {
+		monsterMap[monster.Type.Description()]++
+	}
+	text := "Get ready to fight "
+	var descriptions []string
+	for description, num := range monsterMap {
+		if num > 1 {
+			description += "s"
+		}
+		descriptions = append(descriptions, fmt.Sprintf("%d %s", num, description))
+	}
+	text += strings.Join(descriptions, ",")
+	// TODO would be good to be able to skip..
+	return static.NewModule(text, nil)
+}
+
+func (v *View) RenderInitial() {
+	v.description.Render()
+}
+
+func (v *View) RenderCombat() {
 	// Draw all of the falling words
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 
@@ -147,4 +183,14 @@ func (v *View) Render() {
 		}
 	}
 	termbox.Flush()
+}
+
+// Render assumes that termbox has already been initialized.
+func (v *View) Render() {
+	if v.Model.State() == EnemyDescription {
+		v.RenderInitial()
+	} else {
+		v.RenderCombat()
+	}
+	
 }

@@ -22,10 +22,7 @@ type Controller struct {
 
 func NewModule(player *player.Player, monsters []*Monster) *Controller {
 	model := NewCombatModel(player, monsters)
-	view := &View{
-		Model: model,
-		rows:  20,
-	}
+	view := NewView(model, 20)
 	return &Controller{
 		Model: model,
 		View:  view,

@@ -22,6 +22,7 @@ type State string
 type Column string
 
 const (
+	EnemyDescription State = "DESCRIBE_ENEMY"
 	EnteringAttack State = "ENTERING_ATTACK"
 	// Player is attacking
 	Attack          State = "ATTACK"
@@ -39,6 +40,7 @@ var (
 
 	// TODO(ndunn): this could shorten each time
 	interRoundTime = time.Duration(500) * time.Millisecond
+	initialDescriptionTime = time.Duration(1500) * time.Millisecond
 )
 
 type Model struct {
@@ -86,8 +88,8 @@ func NewCombatModel(p *player.Player, m []*Monster) *Model {
 	return &Model{
 		Monsters: m,
 		Player:   p,
-		state:            EnteringAttack,
-		timeOfTransition: time.Now().Add(interRoundTime),
+		state:            EnemyDescription,
+		timeOfTransition: time.Now().Add(initialDescriptionTime),
 	}
 }
 
@@ -193,7 +195,10 @@ func (c *Model) PublishEndEvents() {
 // The transitions are from
 // EnteringDefense -> Defense -> EnteringAttack -> Attack -> EnteringDefense and on and on.
 func (c *Model) maybeTransition() {
-	if c.state == Defense && len(c.words) == 0 {
+	if c.state == EnemyDescription && time.Now().After(c.timeOfTransition) {
+		c.state = EnteringAttack
+		c.timeOfTransition = time.Now().Add(interRoundTime)
+	} else if c.state == Defense && len(c.words) == 0 {
 		log.Println("defense -> entering attack")
 		c.state = EnteringAttack
 		c.timeOfTransition = time.Now().Add(interRoundTime)
