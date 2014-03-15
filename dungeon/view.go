@@ -3,7 +3,7 @@ package dungeon
 import (
 	"fmt"
 	"strconv"
-	
+
 	"github.com/I82Much/rogue/monster"
 	"github.com/I82Much/rogue/render"
 
@@ -84,29 +84,29 @@ func RuneForMonsters(m []monster.Type) rune {
 }
 
 type cell struct {
-	r rune
+	r  rune
 	fg termbox.Attribute
 	bg termbox.Attribute
 }
 
 func (w *Room) CellForLoc(loc Location) cell {
 	if w.playerLoc == loc {
-		return cell {
-			r: 'P',
-			fg: termbox.ColorDefault, 
+		return cell{
+			r:  'P',
+			fg: termbox.ColorDefault,
 			bg: termbox.ColorDefault,
 		}
 	}
 	if m := w.MonstersAt(loc); m != nil {
-		return cell {
-			r: RuneForMonsters(m),
-			fg: termbox.ColorDefault, 
+		return cell{
+			r:  RuneForMonsters(m),
+			fg: termbox.ColorRed,
 			bg: termbox.ColorDefault,
 		}
 	}
 	t := w.TileAt(loc)
-	return cell {
-		r: t.Rune(),
+	return cell{
+		r:  t.Rune(),
 		fg: t.Foreground(),
 		bg: t.Background(),
 	}

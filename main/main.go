@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/I82Much/rogue"

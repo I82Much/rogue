@@ -2,7 +2,7 @@ package dungeon
 
 import (
 	"fmt"
-	
+
 	"github.com/I82Much/rogue/monster"
 )
 
@@ -42,9 +42,9 @@ type Room struct {
 	rows, cols int
 	tiles      [][]Tile
 	//creatures  [][]Creature
-	
-	monsters map[Location][]monster.Type
-	playerLoc  Location
+
+	monsters  map[Location][]monster.Type
+	playerLoc Location
 	// Sparse map
 	doors map[Location]*Door
 }
@@ -58,7 +58,7 @@ func NewRoom(rows, cols int) *Room {
 		rows:      rows,
 		cols:      cols,
 		tiles:     tiles,
-		monsters: make(map[Location][]monster.Type),
+		monsters:  make(map[Location][]monster.Type),
 		playerLoc: InvalidLoc,
 		doors:     make(map[Location]*Door),
 	}
@@ -156,7 +156,7 @@ func (w *Room) Spawn(row, col int) {
 	w.playerLoc = Loc(row, col)
 }
 
-// Returns error if it couldn't add monster 
+// Returns error if it couldn't add monster
 func (w *Room) AddMonster(row, col int, m monster.Type) error {
 	loc := Loc(row, col)
 	if res := w.MonsterCanOccupy(loc); res != Move {
@@ -177,7 +177,6 @@ func (w *Room) MovePlayer(rows, cols int) MovementResult {
 	return res
 }
 
-
 func (w *Room) PlayerCanOccupy(loc Location) MovementResult {
 	// Players can occupy all the same spaces as monsters, except they
 	// can't move to a place that a monster exists (without starting a fight)
@@ -194,7 +193,7 @@ func (w *Room) MonsterCanOccupy(loc Location) MovementResult {
 	if !w.TileAt(loc).Passable() {
 		return Impassable
 	}
-	return Move	
+	return Move
 }
 
 func (w *Room) InBounds(loc Location) bool {
@@ -221,7 +220,6 @@ func (w *Room) CanMoveTo(loc Location) MovementResult {
 	}
 	return Move
 }
-
 
 func (m MovementResult) String() string {
 	switch m {

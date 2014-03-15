@@ -143,7 +143,7 @@ func (v *View) Render() {
 		attempts := v.Model.attempts
 		accuracyText := fmt.Sprintf("%d / %d (%.2f%%)", hits, attempts, 100.0*float32(hits)/float32(attempts))
 		for i, c := range accuracyText {
-			termbox.SetCell(50 + i, 30, c, termbox.ColorDefault, termbox.ColorDefault)
+			termbox.SetCell(50+i, 30, c, termbox.ColorDefault, termbox.ColorDefault)
 		}
 	}
 	termbox.Flush()
