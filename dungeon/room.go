@@ -206,8 +206,7 @@ func (w *Room) CanMoveTo(loc Location) MovementResult {
 		return OutOfBounds
 	}
 
-	// Is there a creature in that spot
-	// TODO ndunn this probably needs to change for combat to work
+	// Is there a creature in that spot 
 	if got := w.MonstersAt(loc); got != nil {
 		return CreatureOccupying
 	}
