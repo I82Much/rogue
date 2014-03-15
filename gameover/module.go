@@ -39,11 +39,12 @@ const (
 	instructions = `
 			Press 'r' to restart or 'q' to quit
 			Or
-			'e' for easy
-			'm' for medium
-			'h' for hard
-			'i' for insane
-			's' for stenographer
+			'e' for Easy         (15 wpm)
+            'm' for Medium       (40 wpm)
+            'h' for Hard         (70 wpm)
+            'i' for Insane       (100 wpm)
+            's' for Stenographer (300 wpm)
+			
 `
 
 	Quit    = "QUIT"

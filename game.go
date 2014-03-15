@@ -151,11 +151,19 @@ func (g *Game) updateStats(stats stats.Stats) {
 func (g *Game) restart() {
 	g.Stop()
 	g.player = player.WithName("Player 1", g.playerWpm)
+	
+	cm := g.makeCombat([]monster.Type{monster.Scammer})
+	cm.AddListener(g)
+	g.curModule = cm
+	g.Start()
+	
+	/*
 	dm := makeDungeon(g.player)
 	dm.AddListener(g)
 	g.dungeonModule = dm
 	g.curModule = dm
 	g.Start()
+	*/
 }
 
 // Listen handles the state transitions between the different modules.
