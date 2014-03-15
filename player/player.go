@@ -1,15 +1,13 @@
 package player
 
-type Stats struct {
-	MonstersDefeated int
-}
+import "github.com/I82Much/rogue/stats"
 
 type Player struct {
 	Name        string
 	CurrentLife int
 	MaxLife     int
 	Level       int
-	Stats       *Stats
+	Stats       *stats.Stats
 	MaxWPM      int
 }
 
@@ -20,7 +18,7 @@ func WithName(n string, wpm int) *Player {
 		MaxLife:     100,
 		Level:       1,
 		MaxWPM:      wpm,
-		Stats: &Stats{},
+		Stats: &stats.Stats{},
 	}
 }
 

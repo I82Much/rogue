@@ -8,6 +8,7 @@ import (
 	"github.com/I82Much/rogue/event"
 	"github.com/I82Much/rogue/math"
 	"github.com/I82Much/rogue/player"
+	"github.com/I82Much/rogue/stats"
 	termbox "github.com/nsf/termbox-go"
 )
 
@@ -61,39 +62,14 @@ type Model struct {
 	timeOfTransition time.Time
 }
 
-// The extra that's published when player dies or wins
-type Stats struct {
-	LettersTyped int
-	Hits int
-	CompletedWords int
-	MonstersDefeated int
-	Rounds int
-}
-
-// Returns accuracy string (hits out of attempts, and %)
-func (s *Stats) Accuracy() string {
-	if s.LettersTyped == 0 {
-		return ""
-	}
-	return fmt.Sprintf("%d / %d (%.2f%%)", s.Hits, s.LettersTyped, 100.0*float32(s.Hits)/float32(s.LettersTyped))
-}
-
-func (m *Model) MakeStats() Stats {
-	return Stats{
+func (m *Model) MakeStats() stats.Stats {
+	return stats.Stats{
 		LettersTyped: m.attempts,
 		Hits: m.hits,
 		CompletedWords: m.completedWords,
 		Rounds: m.round,
 		MonstersDefeated: m.monstersDefeated,
 	}
-}
-
-func (s *Stats) Add(s2 Stats) {
-	s.LettersTyped += s2.LettersTyped
-	s.Hits += s2.Hits
-	s.CompletedWords += s2.CompletedWords
-	s.Rounds += s2.Rounds
-	s.MonstersDefeated += s2.MonstersDefeated
 }
 
 func (m *Model) AddListener(d event.Listener) {
@@ -110,8 +86,7 @@ func NewCombatModel(p *player.Player, m []*Monster) *Model {
 	return &Model{
 		Monsters: m,
 		Player:   p,
-		// Player starts off defending against an onslaught of attacks
-		state:            EnteringDefense,
+		state:            EnteringAttack,
 		timeOfTransition: time.Now().Add(interRoundTime),
 	}
 }
