@@ -4,6 +4,8 @@ import (
 	"log"
 	"math/rand"
 	"time"
+	
+	"github.com/I82Much/rogue/monster"
 )
 
 // TODO(ndunn): Figure out how to avoid duplication between monster and player.
@@ -12,55 +14,42 @@ type Monster struct {
 	Life           int
 	WordsPerMinute int
 	Words          []AttackWord
-	Type           MonsterType
+	Type           monster.Type
 }
 
-type MonsterType string
-
-const (
-	Haxor   = "HAXOR"
-	Scammer = "SCAMMER"
-	Spammer = "SPAMMER"
-	Blogger = "BLOGGER"
-	// Hybrids
-	HaxorScammer = "HAXOR_SCAMMER"
-	HaxorSpammer = "HAXOR_SPAMMER"
-	HaxorBlogger = "HAXOR_BLOGGER"
-)
-
 var (
-	wordGenMap = map[MonsterType]func(round int) []string{
-		Haxor:        haxorWordFunc,
-		Scammer:      scammerWordFunc,
-		Spammer:      spammerWordFunc,
-		Blogger:      bloggerWordFunc,
-		HaxorScammer: haxorBloggerWordFunc,
-		HaxorSpammer: haxorSpammerWordFunc,
-		HaxorBlogger: haxorBloggerWordFunc,
+	wordGenMap = map[monster.Type]func(round int) []string{
+		monster.Haxor:        haxorWordFunc,
+		monster.Scammer:      scammerWordFunc,
+		monster.Spammer:      spammerWordFunc,
+		monster.Blogger:      bloggerWordFunc,
+		monster.HaxorScammer: haxorBloggerWordFunc,
+		monster.HaxorSpammer: haxorSpammerWordFunc,
+		monster.HaxorBlogger: haxorBloggerWordFunc,
 	}
 
 	// Typing the h4xor stuff is very difficult. Slow it way down. A value of .5 in this case means multiply
 	// the base WPM by this amount.
-	wpmAdjustment = map[MonsterType]float32{
-		Haxor:        0.5,
-		HaxorScammer: 0.7,
-		HaxorSpammer: 0.7,
-		HaxorBlogger: 0.7,
+	wpmAdjustment = map[monster.Type]float32{
+		monster.Haxor:        0.5,
+		monster.HaxorScammer: 0.3,
+		monster.HaxorSpammer: 0.3,
+		monster.HaxorBlogger: 0.3,
 	}
 
 	// The haxor words are short but hard to type. Give a bonus to damage to make up for it.
 	// The value changes meaning depending on if we're in attack phase or defense phase. e.g. a value of 2.0
 	// indicates that if player successfully types it in attack, it does 2x damage. If he fails to type it
 	// in defense mode, he takes the reciprocal (1/2.0) = .5x as much damage.
-	damageAdjustment = map[MonsterType]float32{
-		Haxor:        2.0,
-		HaxorScammer: 1.5,
-		HaxorSpammer: 1.5,
-		HaxorBlogger: 1.5,
+	damageAdjustment = map[monster.Type]float32{
+		monster.Haxor:        2.0,
+		monster.HaxorScammer: 3.0,
+		monster.HaxorSpammer: 3.0,
+		monster.HaxorBlogger: 3.0,
 	}
 )
 
-func NewMonster(life int, wordsPerMinute int, t MonsterType) *Monster {
+func NewMonster(life int, wordsPerMinute int, t monster.Type) *Monster {
 	return &Monster{
 		MaxLife:        life,
 		Life:           life,
@@ -78,21 +67,21 @@ func (m *Monster) Damage(life int) {
 }
 
 // Adjust the WPM based on the monster type. Slow down the hard to type haxor for instance.
-func adjustWpm(t MonsterType, baseWpm int) int {
+func adjustWpm(t monster.Type, baseWpm int) int {
 	if proportion, ok := wpmAdjustment[t]; ok {
 		return int(float32(baseWpm) * proportion)
 	}
 	return baseWpm
 }
 
-func damageProportion(t MonsterType) float32 {
+func damageProportion(t monster.Type) float32 {
 	if prop, ok := damageAdjustment[t]; ok {
 		return prop
 	}
 	return 1.0
 }
 
-func getWords(round int, t MonsterType, wpm int) []*AttackWord {
+func getWords(round int, t monster.Type, wpm int) []*AttackWord {
 	words := wordGenMap[t](round)
 	// TODO what should the delay be
 	log.Printf("monster %v round %d words: %v", t, round, words)
