@@ -39,7 +39,7 @@ var (
 	columns = []Column{Left, Center, Right}
 
 	// TODO(ndunn): this could shorten each time
-	interRoundTime         = time.Duration(500) * time.Millisecond
+	interRoundTime         = time.Duration(750) * time.Millisecond
 	initialDescriptionTime = time.Duration(1500) * time.Millisecond
 )
 

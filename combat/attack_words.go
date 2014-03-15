@@ -42,6 +42,13 @@ func NewWord(word string, dur time.Duration, initialDelay time.Duration) AttackW
 	}
 }
 
+// multiply(2.0, time.Duration) yeidls a duration twice as long
+func multiply(factor float64, dur time.Duration) time.Duration {
+	ns := dur.Nanoseconds()
+	newNs := int(factor * float64(ns))
+	return time.Duration(newNs) * time.Nanosecond
+}
+
 // phrases - the phrases to convert into the attacks
 // words per minute - target number of words per minute. Assumes 5 characters per word,
 // including spaces and punctuation (see wikipedia en.m.wikipedia.org/wiki/Words_per_minute)
@@ -66,9 +73,9 @@ func AttackWords(phrases []string, wordsPerMinute int, delay time.Duration) []*A
 
 		// This is a hack. Oh well it makes the game more fun
 		if chars < 6 {
-			timeOnScreen = time.Duration(2*timeOnScreen.Nanoseconds()) * time.Nanosecond
+			timeOnScreen = multiply(2, timeOnScreen)
 		} else if chars < 8 {
-			timeOnScreen = time.Duration(int(1.5*float32(timeOnScreen.Nanoseconds()))) * time.Nanosecond
+			timeOnScreen = multiply(1.5, timeOnScreen)
 		}
 
 		attack := NewWord(phrase, timeOnScreen, totalDelay)
