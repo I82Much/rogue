@@ -14,7 +14,11 @@ import (
 
 type View struct {
 	Model       *Model
-	rows        int
+	
+	// Row at which the word is off screen when attacking monster
+	monsterDivLine int
+	// Row at which the word from monster does damage against player
+	playerDivLine int
 	description renderer
 }
 
@@ -22,10 +26,12 @@ type renderer interface {
 	Render()
 }
 
-func NewView(m *Model, rows int) *View {
+func NewView(m *Model) *View {
 	return &View{
 		Model:       m,
-		rows:        rows,
+		// TODO(ndunn): this should come from termbox
+		monsterDivLine: 5,
+		playerDivLine: 30,
 		description: initModule(m),
 	}
 }
@@ -63,6 +69,17 @@ func (v *View) RenderInitial() {
 	v.description.Render()
 }
 
+func (v *View) rowForWord(w *AttackWord) int {
+	row := 0
+	// If we're attacking, words are flying up towards the enemies
+	if v.Model.State() == Attack {
+		row = int(math.DoMap(w.proportion, 0.0, 1.0, float64(v.playerDivLine), float64(v.monsterDivLine)))
+	} else if v.Model.State() == Defense {
+		row = int(math.DoMap(w.proportion, 0.0, 1.0, float64(v.monsterDivLine), float64(v.playerDivLine)))
+	}
+	return row
+}
+
 
 func (v *View) RenderWords() {
 	for _, word := range v.Model.Words() {
@@ -71,21 +88,11 @@ func (v *View) RenderWords() {
 			log.Printf("word %v is not visible", word.word)
 			continue
 		}
-
 		foreground := termbox.ColorDefault
 		if word == v.Model.CurrentlyTyping() {
 			foreground = foreground | termbox.AttrBold
 		}
-
-		row := 0
-		// TODO(ndunn): render some sort of line to show where the dividing point is
-		// If we're attacking, words are flying up towards the enemies
-		if v.Model.State() == Attack {
-			row = int(math.Lerp(float64(v.rows), 0.0, word.proportion))
-		} else if v.Model.State() == Defense {
-			row = int(math.Lerp(0.0, float64(v.rows), word.proportion))
-		}
-
+		row := v.rowForWord(word)
 		colOffset := columnOffset(word)
 		// If we're defending, words are flying down towards player
 		for i, c := range word.word {
@@ -111,11 +118,6 @@ func (v *View) RenderMonsters() {
 		offset := i * (10 + healthBarWidth)
 		row := 0
 		render.Render(monsterFigure, row, offset)
-		/*for row, figure := range strings.Split(monsterFigure, "\n") {
-			for j, char := range figure {
-				termbox.SetCell(offset+j, row, char, termbox.ColorDefault, termbox.ColorDefault)
-			}
-		}*/
 		// Draw the health bar
 		healthWidth := math.IntMap(monster.Life, 0, monster.MaxLife, 0, healthBarWidth)
 		if healthWidth < 0 {
@@ -148,14 +150,9 @@ func (v *View) RenderPlayer() {
             |                      |
             |                      |
             +----------------------+
-	
 	`
-	for row, figure := range strings.Split(playerFigure, "\n") {
-		for j, char := range figure {
-			finalRow := 10 + row
-			termbox.SetCell(j, finalRow, char, termbox.ColorDefault, termbox.ColorDefault)
-		}
-	}
+	// TODO(ndunn): Player should really be rooted at bottom of screen
+	render.Render(playerFigure, 10, 0)
 	// Draw player's health bar
 	healthWidth := 40
 	player := v.Model.Player
@@ -185,17 +182,36 @@ func (v *View) RenderAccuracy() {
 	}
 }
 
+// The dividing lines show where the words will either do damage or cease doing damage.
+func (v *View) RenderDividingLines() {
+	divider := "________________________________________________________________"
+	
+	monsterColor := termbox.ColorDefault
+	playerColor := termbox.ColorDefault
+	
+	switch v.Model.State() {
+		// Player will be attacking, so render the MONSTER's line as red
+		case EnteringAttack, Attack:
+			monsterColor = termbox.ColorRed
+		case EnteringDefense, Defense:
+			playerColor = termbox.ColorRed
+	}	
+	
+	// Monster's dividing line
+	render.RenderWithColor(divider, v.monsterDivLine - 1, 0, monsterColor, termbox.ColorDefault)
+	
+	// Player's dividing line
+	// Pull it up one row so that it is at the TOP of where it can be.
+	render.RenderWithColor(divider, v.playerDivLine - 1, 0, playerColor, termbox.ColorDefault)
+	
+}
+
 func (v *View) RenderCombat() {
 	// Draw all of the falling words
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 	v.RenderMonsters()
 	v.RenderPlayer()
-
-	// Draw the dividing line, below which the word does damage
-	divider := "________________________________________________________________"
-	// Pull it up one row so that it is at the TOP of where it can be.
-	render.RenderWithColor(divider, v.rows - 1, 0, termbox.ColorRed, termbox.ColorDefault)
-
+	v.RenderDividingLines()
 	// Falling/rising words
 	v.RenderWords()
 	v.RenderAccuracy()
