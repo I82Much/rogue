@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/I82Much/rogue/math"
 	"github.com/I82Much/rogue/monster"
@@ -203,27 +204,37 @@ func (v *View) RenderDividingLines() {
 	// Player's dividing line
 	// Pull it up one row so that it is at the TOP of where it can be.
 	render.RenderWithColor(divider, v.playerDivLine - 1, 0, playerColor, termbox.ColorDefault)
-	
+}
+
+// If it's between rounds, put a countdown clock
+func (v *View) RenderInterstitial() {
+	timeUntilNextRound := v.Model.timeOfTransition.Sub(time.Now())
+	render.Render(fmt.Sprintf("Get Ready... %.2f seconds till next round", timeUntilNextRound.Seconds()), 25, 0)
 }
 
 func (v *View) RenderCombat() {
 	// Draw all of the falling words
-	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 	v.RenderMonsters()
 	v.RenderPlayer()
 	v.RenderDividingLines()
 	// Falling/rising words
 	v.RenderWords()
 	v.RenderAccuracy()
-	termbox.Flush()
 }
 
 // Render assumes that termbox has already been initialized.
 func (v *View) Render() {
-	if v.Model.State() == EnemyDescription {
+	switch v.Model.State() {
+	case EnemyDescription:
 		v.RenderInitial()
-	} else {
+	case EnteringAttack, EnteringDefense:
+		termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 		v.RenderCombat()
+		v.RenderInterstitial()
+		termbox.Flush()
+	default:
+		termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+		v.RenderCombat()
+		termbox.Flush()
 	}
-
 }
