@@ -52,6 +52,7 @@ type Model struct {
 	attempts       int
 	hits           int
 	completedWords int
+	monstersDefeated int
 	currentTyping  *AttackWord
 
 	// which round of combat
@@ -60,13 +61,48 @@ type Model struct {
 	timeOfTransition time.Time
 }
 
+// The extra that's published when player dies or wins
+type Stats struct {
+	LettersTyped int
+	Hits int
+	CompletedWords int
+	MonstersDefeated int
+	Rounds int
+}
+
+// Returns accuracy string (hits out of attempts, and %)
+func (s *Stats) Accuracy() string {
+	if s.LettersTyped == 0 {
+		return ""
+	}
+	return fmt.Sprintf("%d / %d (%.2f%%)", s.Hits, s.LettersTyped, 100.0*float32(s.Hits)/float32(s.LettersTyped))
+}
+
+func (m *Model) MakeStats() Stats {
+	return Stats{
+		LettersTyped: m.attempts,
+		Hits: m.hits,
+		CompletedWords: m.completedWords,
+		Rounds: m.round,
+		MonstersDefeated: m.monstersDefeated,
+	}
+}
+
+func (s *Stats) Add(s2 Stats) {
+	s.LettersTyped += s2.LettersTyped
+	s.Hits += s2.Hits
+	s.CompletedWords += s2.CompletedWords
+	s.Rounds += s2.Rounds
+	s.MonstersDefeated += s2.MonstersDefeated
+}
+
 func (m *Model) AddListener(d event.Listener) {
 	m.listeners = append(m.listeners, d)
 }
 
-func (m *Model) Publish(e string) {
+func (m *Model) Publish(e string, extras interface{}) {
 	for _, listener := range m.listeners {
-		listener.Listen(e, nil)
+		listener.Listen(e, extras)
 	}
 }
 
@@ -150,6 +186,10 @@ func (c *Model) DamageMonster(w *AttackWord) {
 	for _, monster := range c.Monsters {
 		if !monster.IsDead() {
 			monster.Damage(w.DamageToMonster())
+			// did this attack kill?
+			if monster.IsDead() {
+				c.monstersDefeated++
+			}
 			return
 		}
 	}
@@ -162,7 +202,7 @@ func (c *Model) State() State {
 // Over determines if the fight is over. Meaning either all enemies are dead, or player is dead
 func (c *Model) PublishEndEvents() {
 	if c.Player.IsDead() {
-		c.Publish(PlayerDied)
+		c.Publish(PlayerDied, c.MakeStats())
 	}
 	// If any monster is left, fight's not over
 	for _, m := range c.Monsters {
@@ -170,7 +210,7 @@ func (c *Model) PublishEndEvents() {
 			return
 		}
 	}
-	c.Publish(AllMonstersDied)
+	c.Publish(AllMonstersDied, c.MakeStats())
 }
 
 // maybeTransition potentially shifts the model into another phase. e.g. after all the words are done in combat round,

@@ -39,6 +39,7 @@ var (
 		title.Insane:       InsaneWpm,
 		title.Stenographer: StenographerWpm,
 	}
+	stats = &combat.Stats{}
 )
 
 func (g *Game) lifeForMonster(t monster.Type) int {
@@ -143,9 +144,16 @@ func (g *Game) setWpm(wpm int) {
 	g.player.MaxWPM = wpm
 }
 
+// Ugh. Should the player know anything about this? If not how can dungeon render it correctly.
+func (g *Game) updateStats(stats combat.Stats) {
+	g.player.Stats.MonstersDefeated += stats.MonstersDefeated
+	stats.Add(stats)
+}
+
 func (g *Game) restart() {
 	g.Stop()
 	g.player = player.WithName("Player 1", g.playerWpm)
+	stats = &combat.Stats{}
 	dm := makeDungeon(g.player)
 	dm.AddListener(g)
 	g.dungeonModule = dm
@@ -179,6 +187,7 @@ func (g *Game) Listen(e string, extra interface{}) {
 		g.Start()
 
 	case combat.AllMonstersDied:
+		g.updateStats(extra.(combat.Stats))
 		g.Stop()
 		g.curModule = g.dungeonModule
 		// Ugh.
