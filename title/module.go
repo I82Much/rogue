@@ -16,17 +16,35 @@ ___________                         __________
   |____|  / ____||   __/ \___  >__|  |____|_  /\____/\___  /|____/  \___  >
           \/     |__|        \/             \/      /_____/             \/ 
 		  
-		  Press 's' to start or 'q' to quit
+		Press
+		  'e' for Easy
+		  'm' for Medium
+		  'h' for Hard
+		  'i' for Insane
+		  's' for Stenographer
+		  'q' to Quit
 `
 
+	Easy = "START_EASY"
+	Medium = "START_MEDIUM"
+	Hard = "START_HARD"
+	Insane = "START_INSANE"
+	Stenographer = "START_STENOGRAPHER"
 	Quit  = "QUIT"
-	Start = "START_GAME"
 )
 
 func NewModule() *static.Module {
 	return static.NewModule(title, map[rune]string{
-		's': Start,
-		'S': Start,
+		'e': Easy,
+		'E': Easy,
+		'm': Medium,
+		'M': Medium,
+		'h': Hard,
+		'H': Hard,
+		'i': Insane,
+		'I': Insane,
+		's': Stenographer,
+		'S': Stenographer,
 		'q': Quit,
 		'Q': Quit,
 	})

@@ -17,12 +17,29 @@ type Game struct {
 	curModule     Module
 	dungeonModule *dungeon.Controller
 	player        *player.Player
+	playerWpm int
 }
 
 
 const (
 	rows = 16
 	cols = 32
+	
+	EasyWpm = 15
+	MediumWpm = 40
+	HardWpm = 70
+	InsaneWpm = 100
+	StenographerWpm = 300
+)
+
+var (
+	difficultyMap = map[string]int {
+		title.Easy: EasyWpm,
+		title.Medium: MediumWpm,
+		title.Hard: HardWpm,
+		title.Insane: InsaneWpm,
+		title.Stenographer: StenographerWpm,
+	}
 )
 
 // TODO(ndunn): this needs to be pulled out of the world
@@ -96,9 +113,11 @@ func makeDungeon(p *player.Player) *dungeon.Controller {
 
 func NewGame() *Game {
 	d := title.NewModule()
+	wpm := MediumWpm
 	g := &Game{
 		curModule: d,
-		player:    player.WithName("Player 1"),
+		playerWpm: wpm,
+		player:    player.WithName("Player 1", wpm),
 	}
 	d.AddListener(g)
 	return g
@@ -112,33 +131,46 @@ func (g *Game) Stop() {
 	g.curModule.Stop()
 }
 
+func (g *Game) setWpm(wpm int) {
+	g.playerWpm = wpm
+	g.player.MaxWPM = wpm
+}
+
+func (g *Game) restart() {
+	g.Stop()
+	g.player = player.WithName("Player 1", g.playerWpm)
+	
+	// Fixme this should be the dungeon not combat
+
+	/*
+		dm := makeDungeon(g.player)
+		dm.AddListener(g)
+		g.dungeonModule = dm
+		g.curModule = dm
+		g.Start()*/
+
+	c := makeCombatModule(g.player)
+	c.AddListener(g)
+	g.curModule = c
+	g.Start()
+}
+
 // Listen handles the state transitions between the different modules.
 func (g *Game) Listen(e string) {
 	log.Printf("got event %v", e)
 	switch e {
+	case gameover.Restart:
+		g.restart()
 	// Title screen
-	case title.Start, gameover.Restart:
-		g.Stop()
-
-		/*
-			dm := makeDungeon(g.player)
-			dm.AddListener(g)
-			g.dungeonModule = dm
-			g.curModule = dm
-			g.Start()*/
-
-		c := makeCombatModule(g.player)
-		c.AddListener(g)
-		g.curModule = c
-		g.Start()
-		// Dungeon
+	case title.Easy, title.Medium, title.Hard, title.Insane, title.Stenographer:
+		g.setWpm(difficultyMap[e])
+		g.restart()
 	case dungeon.EnterCombat:
 		g.Stop()
 		c := makeCombatModule(g.player)
 		c.AddListener(g)
 		g.curModule = c
 		g.Start()
-
 		// Combat
 	case combat.PlayerDied:
 		g.Stop()

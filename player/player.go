@@ -13,14 +13,13 @@ type Player struct {
 	MaxWPM      int
 }
 
-func WithName(n string) *Player {
+func WithName(n string, wpm int) *Player {
 	return &Player{
 		Name:        n,
 		CurrentLife: 100,
 		MaxLife:     100,
 		Level:       1,
-		// FIXME
-		MaxWPM: 60,
+		MaxWPM: wpm,
 	}
 }
 
