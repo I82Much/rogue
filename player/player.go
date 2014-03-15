@@ -18,7 +18,7 @@ func WithName(n string, wpm int) *Player {
 		MaxLife:     100,
 		Level:       1,
 		MaxWPM:      wpm,
-		Stats: &stats.Stats{},
+		Stats:       &stats.Stats{},
 	}
 }
 

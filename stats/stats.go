@@ -6,11 +6,11 @@ import (
 
 // The extra that's published when player dies or wins
 type Stats struct {
-	LettersTyped int
-	Hits int
-	CompletedWords int
+	LettersTyped     int
+	Hits             int
+	CompletedWords   int
 	MonstersDefeated int
-	Rounds int
+	Rounds           int
 }
 
 // Returns accuracy string (hits out of attempts, and %)

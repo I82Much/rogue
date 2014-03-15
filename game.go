@@ -68,8 +68,8 @@ func (g *Game) makeCombat(t []monster.Type) Module {
 func makeDungeon(p *player.Player) *dungeon.Controller {
 	room1 := dungeon.WalledRoom(rows, cols)
 	room1.Spawn(rows/2, cols/2)
-	room1.AddMonster(rows/2, cols/2-1, monster.Blogger)
-	room1.AddMonster(rows/2, cols/2-1, monster.Blogger)
+	/*room1.AddMonster(rows/2, cols/2-1, monster.Blogger)
+	room1.AddMonster(rows/2, cols/2-1, monster.Blogger)*/
 	room1.AddMonster(1, cols/2-1, monster.Scammer)
 
 	room1.SetTile(dungeon.Loc(1, 2), dungeon.Water)
@@ -186,11 +186,17 @@ func (g *Game) Listen(e string, extra interface{}) {
 	case combat.AllMonstersDied:
 		g.updateStats(extra.(stats.Stats))
 		g.Stop()
-		g.curModule = g.dungeonModule
-		// Ugh.
+		// Check to see if we've completed the game
 		g.dungeonModule.ReplaceMonsterWithPlayer()
+
+		if g.dungeonModule.HasWon() {
+			win := gameover.NewWinModule(g.player)
+			win.AddListener(g)
+			g.curModule = win
+		} else {
+			g.curModule = g.dungeonModule
+		}
 		g.Start()
-		// TODO get loot
 
 	default:
 		fmt.Errorf("unknown event: %v\n", e)

@@ -59,6 +59,10 @@ func (c *Controller) Stop() {
 	c.running = false
 }
 
+func (c *Controller) HasWon() bool {
+	return !c.model.world.AnyMonstersLeft()
+}
+
 // This is a bit messy, but after successful combat we remember where we just fought
 // (the tile we couldn't move onto because it was occupied), and then we remove the monster
 // that was there and replace it with the player.

@@ -12,8 +12,8 @@ import (
 )
 
 type View struct {
-	Model *Model
-	rows  int
+	Model       *Model
+	rows        int
 	description renderer
 }
 
@@ -21,11 +21,10 @@ type renderer interface {
 	Render()
 }
 
-
 func NewView(m *Model, rows int) *View {
-	return &View {
-		Model: m,
-		rows: rows,
+	return &View{
+		Model:       m,
+		rows:        rows,
 		description: initModule(m),
 	}
 }
@@ -190,5 +189,5 @@ func (v *View) Render() {
 	} else {
 		v.RenderCombat()
 	}
-	
+
 }

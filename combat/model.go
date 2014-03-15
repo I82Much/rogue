@@ -23,7 +23,7 @@ type Column string
 
 const (
 	EnemyDescription State = "DESCRIBE_ENEMY"
-	EnteringAttack State = "ENTERING_ATTACK"
+	EnteringAttack   State = "ENTERING_ATTACK"
 	// Player is attacking
 	Attack          State = "ATTACK"
 	EnteringDefense       = "ENTERING_DEFENSE"
@@ -39,7 +39,7 @@ var (
 	columns = []Column{Left, Center, Right}
 
 	// TODO(ndunn): this could shorten each time
-	interRoundTime = time.Duration(500) * time.Millisecond
+	interRoundTime         = time.Duration(500) * time.Millisecond
 	initialDescriptionTime = time.Duration(1500) * time.Millisecond
 )
 
@@ -52,11 +52,11 @@ type Model struct {
 
 	state State
 
-	attempts       int
-	hits           int
-	completedWords int
+	attempts         int
+	hits             int
+	completedWords   int
 	monstersDefeated int
-	currentTyping  *AttackWord
+	currentTyping    *AttackWord
 
 	// which round of combat
 	round int
@@ -66,10 +66,10 @@ type Model struct {
 
 func (m *Model) MakeStats() stats.Stats {
 	return stats.Stats{
-		LettersTyped: m.attempts,
-		Hits: m.hits,
-		CompletedWords: m.completedWords,
-		Rounds: m.round,
+		LettersTyped:     m.attempts,
+		Hits:             m.hits,
+		CompletedWords:   m.completedWords,
+		Rounds:           m.round,
 		MonstersDefeated: m.monstersDefeated,
 	}
 }
@@ -86,8 +86,8 @@ func (m *Model) Publish(e string, extras interface{}) {
 
 func NewCombatModel(p *player.Player, m []*Monster) *Model {
 	return &Model{
-		Monsters: m,
-		Player:   p,
+		Monsters:         m,
+		Player:           p,
 		state:            EnemyDescription,
 		timeOfTransition: time.Now().Add(initialDescriptionTime),
 	}

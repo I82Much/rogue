@@ -75,7 +75,7 @@ func (c *Controller) draw() {
 
 func (c *Controller) Start() {
 	go c.input()
-	c.Run(time.Duration(33) * time.Millisecond)
+	c.Run(time.Duration(20) * time.Millisecond)
 }
 
 func (c *Controller) Stop() {

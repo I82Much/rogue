@@ -114,15 +114,6 @@ func (w *Room) MonstersAt(loc Location) []monster.Type {
 	return w.monsters[loc]
 }
 
-/*
-func (w *Room) SetCreature(loc Location, c Creature) MovementResult {
-	res := w.CanMoveTo(loc)
-	if res == Move {
-		w.creatures[loc.Row][loc.Col] = c
-	}
-	return res
-}*/
-
 func (w *Room) RemovePlayer() {
 	if w.playerLoc == InvalidLoc {
 		return
@@ -132,10 +123,17 @@ func (w *Room) RemovePlayer() {
 
 // After combat, we take the place where the monster was formerly occupying
 func (w *Room) ReplaceMonsterWithPlayer(loc Location) {
-	w.monsters[loc] = nil
+	delete(w.monsters, loc)
 	/*w.creatures[loc.Row][loc.Col] = PlayerCreature
 	w.creatures[w.playerLoc.Row][w.playerLoc.Col] = None*/
 	w.playerLoc = loc
+}
+
+func (w *Room) AnyMonstersLeft() bool {
+	if w == nil {
+		return false
+	}
+	return len(w.monsters) > 0
 }
 
 func (w *Room) Rows() int {

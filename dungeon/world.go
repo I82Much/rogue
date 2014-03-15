@@ -22,6 +22,17 @@ func NewWorld(rows, cols int) *World {
 	}
 }
 
+func (w *World) AnyMonstersLeft() bool {
+	for row := 0; row < len(w.rooms); row++ {
+		for col := 0; col < len(w.rooms[row]); col++ {
+			if w.rooms[row][col].AnyMonstersLeft() {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (w *World) RoomAt(loc Location) *Room {
 	return w.rooms[loc.Row][loc.Col]
 }

@@ -19,32 +19,32 @@ const (
 )
 
 var (
-	descriptions = map[Type][]string {
-		Haxor: []string {
+	descriptions = map[Type][]string{
+		Haxor: []string{
 			"pwning hax0r",
 			"1337 h4x0r(s) looking to pwn noobs like you",
 			"script kiddies looking to wreck your computer",
 		},
-		Scammer: []string {
+		Scammer: []string{
 			"scammer(s) seeking someone to play the role of next of kin",
 		},
-		Blogger: []string {
+		Blogger: []string{
 			"self aggrandizing blogger(s)",
 			"blogger(s) who want you to join their email newsletter",
 			"blogger(s) who really would like you to follow them",
 			"blogger(s) who have a really great kickstarter for you to back",
 		},
-		Spammer: []string {
+		Spammer: []string{
 			"desperate spammer(s) looking to sell you some viagra",
 			"folk(s) wanting you to Call Now",
 		},
-		HaxorScammer: []string {
+		HaxorScammer: []string{
 			"scamming hax0r(s)",
 		},
-		HaxorSpammer: []string {
+		HaxorSpammer: []string{
 			"spamming hax0r(s)",
 		},
-		HaxorBlogger: []string {
+		HaxorBlogger: []string{
 			"bl0gging hax0r(s)",
 		},
 	}
@@ -55,6 +55,6 @@ func randS(s []string) string {
 	return s[rand.Int31n(int32(len(s)))]
 }
 
-func (t Type) Description(num int) string{
+func (t Type) Description(num int) string {
 	return fmt.Sprintf("%d %s", num, randS(descriptions[t]))
 }
