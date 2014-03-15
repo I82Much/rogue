@@ -41,23 +41,25 @@ var (
 	}
 )
 
-// TODO(ndunn): this needs to be pulled out of the world
-func makeCombatModule(p *player.Player) Module {
-	m1 := combat.NewMonster(10, p.MaxWPM, monster.HaxorBlogger)
-	/*m1.Words = []*combat.AttackWord{
-		combat.NewWord("Hello", time.Duration(3)*time.Second),
-		combat.NewWord("Supercalifragilistic", time.Duration(2)*time.Second),
-	}*/
-	m2 := combat.NewMonster(10, p.MaxWPM, monster.Spammer)
-	/*m2.Words = []*combat.AttackWord{
-		combat.NewWord("World", time.Duration(1)*time.Second),
-		combat.NewWord("Blah", time.Duration(2)*time.Second),
-		combat.NewWord("BlahBlah", time.Duration(2)*time.Second),
-		combat.NewWord("Aasdfasdfasdfasdfasdfasdfasdf", time.Duration(3)*time.Second),
-		combat.NewWord("Foo", time.Duration(1)*time.Second),
-	}*/
+func (g *Game) lifeForMonster(t monster.Type) int {
+	// TODO use player's level
+	// TODO change it based on the monster
+	return 10
+}
 
-	module := combat.NewModule(p, []*combat.Monster{m1, m2})
+// TODO(ndunn): this needs to be pulled out of the world
+func (g *Game) makeCombat(t []monster.Type) Module {
+	if len(t) == 0 {
+		panic("need >= 1 monster")
+	}
+	player := g.player
+	var monsters []*combat.Monster
+	for _, m := range t {
+		life := g.lifeForMonster(m)
+		m1 := combat.NewMonster(life, player.MaxWPM, m)
+		monsters = append(monsters, m1)
+	}
+	module := combat.NewModule(player, monsters)
 	return module
 }
 
@@ -65,8 +67,9 @@ func makeCombatModule(p *player.Player) Module {
 func makeDungeon(p *player.Player) *dungeon.Controller {
 	room1 := dungeon.WalledRoom(rows, cols)
 	room1.Spawn(rows/2, cols/2)
-	room1.SpawnMonster()
-	room1.SpawnMonster()
+	room1.AddMonster(rows/2, cols/2-1, monster.Blogger)
+	room1.AddMonster(rows/2, cols/2-1, monster.Blogger)
+	room1.AddMonster(1, cols/2-1, monster.Scammer)
 
 	room1.SetTile(dungeon.Loc(1, 2), dungeon.Water)
 	room1.SetTile(dungeon.Loc(2, 2), dungeon.Water)
@@ -143,25 +146,15 @@ func (g *Game) setWpm(wpm int) {
 func (g *Game) restart() {
 	g.Stop()
 	g.player = player.WithName("Player 1", g.playerWpm)
-
-	// Fixme this should be the dungeon not combat
-
-	
 	dm := makeDungeon(g.player)
 	dm.AddListener(g)
 	g.dungeonModule = dm
 	g.curModule = dm
 	g.Start()
-
-	/*
-	c := makeCombatModule(g.player)
-	c.AddListener(g)
-	g.curModule = c
-	g.Start()*/
 }
 
 // Listen handles the state transitions between the different modules.
-func (g *Game) Listen(e string) {
+func (g *Game) Listen(e string, extra interface{}) {
 	log.Printf("got event %v", e)
 	switch e {
 	case gameover.Restart:
@@ -172,7 +165,8 @@ func (g *Game) Listen(e string) {
 		g.restart()
 	case dungeon.EnterCombat:
 		g.Stop()
-		c := makeCombatModule(g.player)
+		types := extra.([]monster.Type)
+		c := g.makeCombat(types)
 		c.AddListener(g)
 		g.curModule = c
 		g.Start()

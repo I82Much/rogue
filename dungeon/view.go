@@ -2,6 +2,9 @@ package dungeon
 
 import (
 	"fmt"
+	"strconv"
+	
+	"github.com/I82Much/rogue/monster"
 	"github.com/I82Much/rogue/render"
 
 	termbox "github.com/nsf/termbox-go"
@@ -60,17 +63,24 @@ func (t Tile) Background() termbox.Attribute {
 	return termbox.ColorDefault
 }
 
-func (c Creature) Rune() rune {
-	switch c {
-	case None:
+func RuneForMonsters(m []monster.Type) rune {
+	// TODO(ndunn): It would be pretty cool if it used '?' for monsters you haven't fought yet
+	if len(m) == 0 {
 		return ' '
-	case PlayerCreature:
-		return 'P'
-	case MonsterCreature:
-		return 'M'
-	default:
-		panic(fmt.Sprintf("unknown monster type %v", c))
+	} else if len(m) > 1 {
+		return []rune(strconv.Itoa(len(m)))[0]
 	}
+	switch m[0] {
+	case monster.Haxor, monster.HaxorScammer, monster.HaxorSpammer, monster.HaxorBlogger:
+		return 'H'
+	case monster.Scammer:
+		return '$'
+	case monster.Spammer:
+		return 'S'
+	case monster.Blogger:
+		return 'B'
+	}
+	panic(fmt.Sprintf("unknown type %v", m[0]))
 }
 
 type cell struct {
@@ -79,11 +89,17 @@ type cell struct {
 	bg termbox.Attribute
 }
 
-
 func (w *Room) CellForLoc(loc Location) cell {
-	if c := w.CreatureAt(loc); c != None {
+	if w.playerLoc == loc {
 		return cell {
-			r: c.Rune(),
+			r: 'P',
+			fg: termbox.ColorDefault, 
+			bg: termbox.ColorDefault,
+		}
+	}
+	if m := w.MonstersAt(loc); m != nil {
+		return cell {
+			r: RuneForMonsters(m),
 			fg: termbox.ColorDefault, 
 			bg: termbox.ColorDefault,
 		}

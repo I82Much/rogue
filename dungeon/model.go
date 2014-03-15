@@ -28,9 +28,9 @@ func (m *Model) AddListener(d event.Listener) {
 	m.listeners = append(m.listeners, d)
 }
 
-func (m *Model) Publish(e string) {
+func (m *Model) Publish(e string, extras interface{}) {
 	for _, listener := range m.listeners {
-		listener.Listen(e)
+		listener.Listen(e, extras)
 	}
 }
 
@@ -40,7 +40,8 @@ func (m *Model) MovePlayer(rows, cols int) MovementResult {
 	if res == CreatureOccupying {
 		// Store this for later
 		m.combatLocation = m.world.CurrentRoom().playerLoc.Add(Loc(rows, cols))
-		m.Publish(EnterCombat)
+		monsters := m.world.CurrentRoom().MonstersAt(m.combatLocation)
+		m.Publish(EnterCombat, monsters)
 	}
 	return res
 }

@@ -66,7 +66,7 @@ func (m *Model) AddListener(d event.Listener) {
 
 func (m *Model) Publish(e string) {
 	for _, listener := range m.listeners {
-		listener.Listen(e)
+		listener.Listen(e, nil)
 	}
 }
 

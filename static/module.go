@@ -40,7 +40,7 @@ func (s *Module) Start() {
 
 func (s *Module) publish(evt string) {
 	for _, d := range s.listeners {
-		d.Listen(evt)
+		d.Listen(evt, nil)
 	}
 }
 

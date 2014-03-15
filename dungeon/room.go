@@ -2,6 +2,8 @@ package dungeon
 
 import (
 	"fmt"
+	
+	"github.com/I82Much/rogue/monster"
 )
 
 type Tile int32
@@ -17,11 +19,6 @@ const (
 	DoorTile
 	Water
 	Bridge
-
-	// Creatures
-	None Creature = iota
-	PlayerCreature
-	MonsterCreature
 
 	// Movement possibilities
 	Move MovementResult = iota
@@ -44,7 +41,9 @@ type Door struct {
 type Room struct {
 	rows, cols int
 	tiles      [][]Tile
-	creatures  [][]Creature
+	//creatures  [][]Creature
+	
+	monsters map[Location][]monster.Type
 	playerLoc  Location
 	// Sparse map
 	doors map[Location]*Door
@@ -55,18 +54,11 @@ func NewRoom(rows, cols int) *Room {
 	for row := 0; row < rows; row++ {
 		tiles[row] = make([]Tile, cols)
 	}
-	creatures := make([][]Creature, rows)
-	for row := 0; row < rows; row++ {
-		creatures[row] = make([]Creature, cols)
-		for col := 0; col < cols; col++ {
-			creatures[row][col] = None
-		}
-	}
 	return &Room{
 		rows:      rows,
 		cols:      cols,
 		tiles:     tiles,
-		creatures: creatures,
+		monsters: make(map[Location][]monster.Type),
 		playerLoc: InvalidLoc,
 		doors:     make(map[Location]*Door),
 	}
@@ -118,30 +110,31 @@ func (w *Room) SetDoor(loc Location, d *Door) {
 	w.SetTile(loc, DoorTile)
 }
 
-func (w *Room) CreatureAt(loc Location) Creature {
-	return w.creatures[loc.Row][loc.Col]
+func (w *Room) MonstersAt(loc Location) []monster.Type {
+	return w.monsters[loc]
 }
 
+/*
 func (w *Room) SetCreature(loc Location, c Creature) MovementResult {
 	res := w.CanMoveTo(loc)
 	if res == Move {
 		w.creatures[loc.Row][loc.Col] = c
 	}
 	return res
-}
+}*/
 
 func (w *Room) RemovePlayer() {
 	if w.playerLoc == InvalidLoc {
 		return
 	}
-	w.creatures[w.playerLoc.Row][w.playerLoc.Col] = None
 	w.playerLoc = InvalidLoc
 }
 
 // After combat, we take the place where the monster was formerly occupying
 func (w *Room) ReplaceMonsterWithPlayer(loc Location) {
-	w.creatures[loc.Row][loc.Col] = PlayerCreature
-	w.creatures[w.playerLoc.Row][w.playerLoc.Col] = None
+	w.monsters[loc] = nil
+	/*w.creatures[loc.Row][loc.Col] = PlayerCreature
+	w.creatures[w.playerLoc.Row][w.playerLoc.Col] = None*/
 	w.playerLoc = loc
 }
 
@@ -157,35 +150,51 @@ func (w *Room) Spawn(row, col int) {
 	if w.playerLoc != InvalidLoc {
 		panic("player already spawned")
 	}
-	if w.SetCreature(Loc(row, col), PlayerCreature) != Move {
-		panic("player can't spawn here")
+	if reason := w.PlayerCanOccupy(Loc(row, col)); reason != Move {
+		panic(fmt.Sprintf("player can't spawn here: %v", reason))
 	}
 	w.playerLoc = Loc(row, col)
 }
 
-// Attempts to spawn a monster
-func (w *Room) SpawnMonster() bool {
-	for row := 0; row < w.Rows(); row++ {
-		for col := 0; col < w.Cols(); col++ {
-			if w.SetCreature(Loc(row, col), MonsterCreature) == Move {
-				return true
-			}
-		}
+// Returns error if it couldn't add monster 
+func (w *Room) AddMonster(row, col int, m monster.Type) error {
+	loc := Loc(row, col)
+	if res := w.MonsterCanOccupy(loc); res != Move {
+		return fmt.Errorf("Monster can't occupy %v: %v", loc, res)
 	}
-	return false
+	w.monsters[loc] = append(w.monsters[loc], m)
+	return nil
 }
 
 // MovePlayer moves the player the given number of rows/cols relative
 // to where he already is. No-op if out of bounds / can't move there.
 func (w *Room) MovePlayer(rows, cols int) MovementResult {
 	newLoc := w.playerLoc.Add(Location{Row: rows, Col: cols})
-	res := w.SetCreature(newLoc, PlayerCreature)
+	res := w.PlayerCanOccupy(newLoc)
 	if res == Move {
-		// Remove old value
-		w.creatures[w.playerLoc.Row][w.playerLoc.Col] = None
 		w.playerLoc = newLoc
 	}
 	return res
+}
+
+
+func (w *Room) PlayerCanOccupy(loc Location) MovementResult {
+	// Players can occupy all the same spaces as monsters, except they
+	// can't move to a place that a monster exists (without starting a fight)
+	if w.MonstersAt(loc) != nil {
+		return CreatureOccupying
+	}
+	return w.MonsterCanOccupy(loc)
+}
+
+func (w *Room) MonsterCanOccupy(loc Location) MovementResult {
+	if !w.InBounds(loc) {
+		return OutOfBounds
+	}
+	if !w.TileAt(loc).Passable() {
+		return Impassable
+	}
+	return Move	
 }
 
 func (w *Room) InBounds(loc Location) bool {
@@ -202,7 +211,7 @@ func (w *Room) CanMoveTo(loc Location) MovementResult {
 
 	// Is there a creature in that spot
 	// TODO ndunn this probably needs to change for combat to work
-	if got := w.CreatureAt(loc); got != None {
+	if got := w.MonstersAt(loc); got != nil {
 		return CreatureOccupying
 	}
 
