@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/I82Much/rogue/math"
+	"github.com/I82Much/rogue/monster"
 	"github.com/I82Much/rogue/static"
 	termbox "github.com/nsf/termbox-go"
 )
@@ -44,17 +45,14 @@ func columnOffset(w *AttackWord) int {
 }
 
 func initModule(m *Model) renderer {
-	var monsterMap = make(map[string]int)
+	var monsterMap = make(map[monster.Type]int)
 	for _, monster := range m.Monsters {
-		monsterMap[monster.Type.Description()]++
+		monsterMap[monster.Type]++
 	}
 	text := "Get ready to fight "
 	var descriptions []string
-	for description, num := range monsterMap {
-		if num > 1 {
-			description += "s"
-		}
-		descriptions = append(descriptions, fmt.Sprintf("%d %s", num, description))
+	for t, num := range monsterMap {
+		descriptions = append(descriptions, t.Description(num))
 	}
 	text += strings.Join(descriptions, ",")
 	// TODO would be good to be able to skip..
