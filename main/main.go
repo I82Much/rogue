@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"math/rand"
+	"time"
 
 	"github.com/I82Much/rogue"
 	termbox "github.com/nsf/termbox-go"
 )
 
 func main() {
+	rand.Seed(int64(time.Now().Nanosecond()))
 
 	f, err := os.OpenFile("testlogfile2", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
