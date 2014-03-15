@@ -25,12 +25,12 @@ const (
 
 // TODO(ndunn): this needs to be pulled out of the world
 func makeCombatModule(p *player.Player) Module {
-	m1 := combat.NewMonster(50, p.MaxWPM, combat.Haxor)
+	m1 := combat.NewMonster(10, p.MaxWPM, combat.Haxor)
 	/*m1.Words = []*combat.AttackWord{
 		combat.NewWord("Hello", time.Duration(3)*time.Second),
 		combat.NewWord("Supercalifragilistic", time.Duration(2)*time.Second),
 	}*/
-	m2 := combat.NewMonster(50, p.MaxWPM, combat.Scammer)
+	m2 := combat.NewMonster(10, p.MaxWPM, combat.Scammer)
 	/*m2.Words = []*combat.AttackWord{
 		combat.NewWord("World", time.Duration(1)*time.Second),
 		combat.NewWord("Blah", time.Duration(2)*time.Second),

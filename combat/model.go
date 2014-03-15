@@ -88,7 +88,7 @@ func (c *Model) CurrentlyTyping() *AttackWord {
 	return c.currentTyping
 }
 
-func (c *Model) getPlayerAttackWords(round int) []*AttackWord{
+func (c *Model) getPlayerAttackWords(round int) []*AttackWord {
 	for _, m := range c.Monsters {
 		if m.IsDead() {
 			continue
@@ -137,14 +137,14 @@ func (c *Model) KillWord(w *AttackWord) {
 }
 
 func (c *Model) DamagePlayer(w *AttackWord) {
-	c.Player.Damage(w.Damage())
+	c.Player.Damage(w.DamageToPlayer())
 }
 
 func (c *Model) DamageMonster(w *AttackWord) {
 	// Pick the first monster that's not dead
 	for _, monster := range c.Monsters {
 		if !monster.IsDead() {
-			monster.Damage(w.Damage())
+			monster.Damage(w.DamageToMonster())
 			return
 		}
 	}

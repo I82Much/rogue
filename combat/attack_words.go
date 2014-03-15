@@ -26,16 +26,19 @@ type AttackWord struct {
 	onScreen time.Time
 	duration time.Duration
 	Col      Column
+	// The damage is multiplied by this factor to offset how hard it is to type some phrases (e.g. 1337)
+	DifficultyBonus float32
 }
 
 func NewWord(word string, dur time.Duration, initialDelay time.Duration) AttackWord {
 	return AttackWord{
-		word:         word,
-		proportion:   0.0,
-		initialDelay: initialDelay,
-		onScreen:     time.Now().Add(initialDelay),
-		duration:     dur,
-		Col:          Left,
+		word:            word,
+		proportion:      0.0,
+		initialDelay:    initialDelay,
+		onScreen:        time.Now().Add(initialDelay),
+		duration:        dur,
+		Col:             Left,
+		DifficultyBonus: 1.0,
 	}
 }
 
@@ -48,7 +51,7 @@ func AttackWords(phrases []string, wordsPerMinute int, delay time.Duration) []*A
 	if wordsPerMinute <= 0 {
 		panic(fmt.Sprintf("need wpm > 0; got %d", wordsPerMinute))
 	}
-	
+
 	log.Printf("attack words phrases %v wpm %d delay %v", phrases, wordsPerMinute, delay)
 
 	var totalDelay = delay
@@ -67,7 +70,6 @@ func AttackWords(phrases []string, wordsPerMinute int, delay time.Duration) []*A
 		} else if chars < 8 {
 			timeOnScreen = time.Duration(int(1.5*float32(timeOnScreen.Nanoseconds()))) * time.Nanosecond
 		}
-
 
 		attack := NewWord(phrase, timeOnScreen, totalDelay)
 
@@ -92,6 +94,15 @@ func chooseNRandomly(candidates []string, n int) []string {
 		res = append(res, candidates[index])
 	}
 	return res
+}
+
+func (w *AttackWord) DamageToPlayer() int {
+	// e.g. high difficulty words get a bonus, which means that it does less damage to player
+	return int(float32(w.Damage()) / w.DifficultyBonus)
+}
+
+func (w *AttackWord) DamageToMonster() int {
+	return int(float32(w.Damage()) * w.DifficultyBonus)
 }
 
 func (w *AttackWord) Damage() int {

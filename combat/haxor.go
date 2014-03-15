@@ -74,8 +74,30 @@ func makeHaxor(w string) string {
 	return w
 }
 
+func makeStringsHaxor(s []string) []string {
+	var phrases []string
+	for _, s1 := range s {
+		phrases = append(phrases, makeHaxor(s1))
+	}
+	return phrases
+}
+
+// Plain old haxor.
 func haxorWordFunc(round int) []string {
-	// Just for fun we'll use the other monster's words too
-	// FIXME if we have time convert the words from blogger etc
 	return chooseNRandomly(haxorWords, round+1)
+}
+
+// haxor x blogger
+func haxorBloggerWordFunc(round int) []string {
+	return makeStringsHaxor(bloggerWordFunc(round))
+}
+
+// haxor x spammer
+func haxorSpammerWordFunc(round int) []string {
+	return makeStringsHaxor(spammerWordFunc(round))
+}
+
+// haxor x scammer
+func haxorScammerWordFunc(round int) []string {
+	return makeStringsHaxor(scammerWordFunc(round))
 }
