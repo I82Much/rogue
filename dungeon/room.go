@@ -16,10 +16,10 @@ type Creature int32
 type MovementResult int32
 
 const (
-	// Need 1 for each wall. But if we have monsters etc that's crowded - let's just make sure it's 4x4
-	MinRows = 4
+	// Need 1 for each wall. But if we have monsters etc that's crowded.
+	MinRows = 6
 	MaxRows = 16
-	MinCols = 4
+	MinCols = 6
 	MaxCols = 40
 	
 	// Tiles
@@ -39,6 +39,14 @@ const (
 
 var (
 	InvalidLoc = Location{Row: -1, Col: -1}
+)
+
+type DoorDir string
+const (
+	North DoorDir = "NORTH"
+	East DoorDir = "EAST"
+	South DoorDir = "SOUTH"
+	West DoorDir = "WEST"
 )
 
 type Door struct {
@@ -130,7 +138,8 @@ func (w *Room) SetTile(loc Location, t Tile) {
 	w.tiles[loc.Row][loc.Col] = t
 }
 
-func (w *Room) SetDoor(loc Location, d *Door) {
+func (w *Room) SetDoor(dir DoorDir, d *Door) {
+	loc := w.LocForDoor(dir)
 	w.doors[loc] = d
 	w.SetTile(loc, LockedDoor)
 }
@@ -288,4 +297,78 @@ func RandomWalledRoom() *Room {
 	cols := MinCols + int(rand.Int31n(MaxCols - MinCols))
 	log.Printf("Creating room of dimensions %d rows %d cols", rows, cols)
 	return WalledRoom(rows, cols)
+}
+
+func (w *Room) LocForDoor(d DoorDir) Location{
+	switch d {
+	case North:
+		return Loc(0, w.Cols()/2)
+	case South:
+		return Loc(w.Rows()-1, w.Cols()/2)
+	case West:
+		return Loc(w.Rows()/2, 0)
+	case East:
+		return Loc(w.Rows()/2, w.Cols()-1)
+	}
+	panic(fmt.Sprintf("unknown door location %v", d))
+}
+
+func min(a, b int) int{
+	if a < b {
+		return a
+	}
+	return b
+}
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+// An Island in the middle of the room surrounded by water
+func IslandRoom(doors map[DoorDir]bool) *Room {
+	r := RandomWalledRoom()
+	// Flood room with water
+	for row := 1; row < r.Rows() - 1; row++ {
+		for col := 1; col < r.Cols() - 1; col++ {
+			r.SetTile(Loc(row, col), Water)
+		}
+	}
+	
+	// Build an island in middle
+	middleRow := r.Rows()/2
+	middleCol := r.Cols()/2
+	for row := middleRow-1; row <= middleRow + 1; row++ {
+		for col := middleCol; col <= middleCol + 1; col++ {
+			r.SetTile(Loc(row, col), Floor)
+		}
+	}
+	
+	// Build bridges from doors to middle
+	if len(doors) == 0 {
+		panic("no doors given")
+	}
+	for dir := range doors {
+		loc := r.LocForDoor(dir)
+		log.Printf("placing bridge to connect %v with island, at location %v\n", dir, loc)
+		// Build from the middle up to the location
+		minRow := min(loc.Row, middleRow)
+		maxRow := max(loc.Row, middleRow)
+		minCol := min(loc.Col, middleCol)
+		maxCol := max(loc.Col, middleCol)
+		log.Printf("min row %d max row %d min col %d max col %d\n", minRow, maxRow, minCol, maxCol)
+		for row := minRow; row <= maxRow; row++ {
+			for col := minCol; col <= maxCol; col++ {
+				bridgeLoc := Loc(row, col)
+				log.Printf("bridge loc? %v\n", bridgeLoc)
+				
+				if r.TileAt(bridgeLoc) == Water {
+					log.Printf("placing bridge at %d %d", row, col)
+					r.SetTile(bridgeLoc, Bridge)
+				}
+			}
+		}
+	}
+	return r
 }
