@@ -68,7 +68,7 @@ func makeDungeon(p *player.Player) *dungeon.Controller {
 		dungeon.South:true,
 	})
 	room1.RandSpawn()
-	room1.AddMonster(1, room1.Cols()/2-1, monster.Scammer)
+	room1.SpawnMonster(monster.Scammer)
 
 	/*
 	room1.SetTile(dungeon.Loc(1, 2), dungeon.Water)
@@ -78,8 +78,8 @@ func makeDungeon(p *player.Player) *dungeon.Controller {
 
 	// 2nd room to east of room 1
 	room2 := dungeon.RandomWalledRoom()
-	room2.AddMonster(room2.Rows()/2, room2.Cols()/2-1, monster.Blogger)
-	room2.AddMonster(room2.Rows()/2, room2.Cols()/2-1, monster.Blogger)
+	room2.SpawnMonster(monster.Blogger)
+	room2.SpawnMonster(monster.Blogger)
 
 	// 3rd room to south of room 1
 	room3 := dungeon.RandomWalledRoom()

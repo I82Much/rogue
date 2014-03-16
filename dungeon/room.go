@@ -222,6 +222,23 @@ func (w *Room) AddMonster(row, col int, m monster.Type) error {
 	return nil
 }
 
+func (w *Room) SpawnMonster(m monster.Type) (Location, error) {
+	var open []Location
+	for row := 0; row < w.Rows(); row++ {
+		for col := 0; col < w.Cols(); col++ {
+			loc := Loc(row, col)
+			if w.MonsterCanOccupy(loc) == Move{
+				open = append(open, loc)
+			}
+		}
+	}
+	if len(open) == 0 {
+		panic("Cannot find any place to spawn monster")
+	}
+	loc := open[int(rand.Int31n(int32(len(open))))]
+	return loc, w.AddMonster(loc.Row, loc.Col, m)
+}
+
 // MovePlayer moves the player the given number of rows/cols relative
 // to where he already is. No-op if out of bounds / can't move there.
 func (w *Room) MovePlayer(rows, cols int) MovementResult {
@@ -344,7 +361,6 @@ func IslandRoom(doors map[DoorDir]bool) *Room {
 			r.SetTile(Loc(row, col), Floor)
 		}
 	}
-	
 	// Build bridges from doors to middle
 	if len(doors) == 0 {
 		panic("no doors given")
