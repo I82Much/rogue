@@ -1,6 +1,8 @@
 package dungeon
 
 import (
+	"log"
+	
 	"github.com/I82Much/rogue/event"
 	"github.com/I82Much/rogue/player"
 	termbox "github.com/nsf/termbox-go"
@@ -61,6 +63,17 @@ func (c *Controller) Stop() {
 
 func (c *Controller) HasWon() bool {
 	return !c.model.world.AnyMonstersLeft()
+}
+
+func (c *Controller) MaybeUnlockCurrentRoom() {
+	log.Println("maybe unlock room")
+	curRoom := c.model.world.CurrentRoom()
+	if !curRoom.AnyMonstersLeft() {
+		log.Println("unlocking the doors")
+		curRoom.UnlockDoors()
+	} else {
+		log.Println("monsters left; not unlocking the door")
+	}
 }
 
 // This is a bit messy, but after successful combat we remember where we just fought

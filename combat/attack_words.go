@@ -69,6 +69,7 @@ func AttackWords(phrases []string, wordsPerMinute int, delay time.Duration) []*A
 		chars := len(phrase)
 		minutes := float32(chars) / float32(cpm)
 		seconds := minutes * 60.0
+		// Don't change this to just seconds or you'll get truncation to zero. Not what we want.
 		timeOnScreen := time.Duration(int(1000*seconds)) * time.Millisecond
 
 		// This is a hack. Oh well it makes the game more fun

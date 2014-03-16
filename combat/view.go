@@ -56,12 +56,12 @@ func initModule(m *Model) renderer {
 	for _, monster := range m.Monsters {
 		monsterMap[monster.Type]++
 	}
-	text := "Get ready to fight "
+	text := "Get ready to fight \n"
 	var descriptions []string
 	for t, num := range monsterMap {
-		descriptions = append(descriptions, t.Description(num))
+		descriptions = append(descriptions, "* " + t.Description(num))
 	}
-	text += strings.Join(descriptions, ",")
+	text += strings.Join(descriptions, "\n")
 	// TODO would be good to be able to skip..
 	return static.NewModule(text, nil)
 }

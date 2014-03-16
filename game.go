@@ -68,8 +68,6 @@ func (g *Game) makeCombat(t []monster.Type) Module {
 func makeDungeon(p *player.Player) *dungeon.Controller {
 	room1 := dungeon.WalledRoom(rows, cols)
 	room1.Spawn(rows/2, cols/2)
-	/*room1.AddMonster(rows/2, cols/2-1, monster.Blogger)
-	room1.AddMonster(rows/2, cols/2-1, monster.Blogger)*/
 	room1.AddMonster(1, cols/2-1, monster.Scammer)
 
 	room1.SetTile(dungeon.Loc(1, 2), dungeon.Water)
@@ -79,9 +77,13 @@ func makeDungeon(p *player.Player) *dungeon.Controller {
 
 	// 2nd room to east of room 1
 	room2 := dungeon.WalledRoom(rows, cols)
+	room2.AddMonster(rows/2, cols/2-1, monster.Blogger)
+	room2.AddMonster(rows/2, cols/2-1, monster.Blogger)
 
 	// 3rd room to south of room 1
 	room3 := dungeon.WalledRoom(rows, cols)
+	room3.AddMonster(rows/2, cols/2-1, monster.Scammer)
+	room3.AddMonster(rows/2, cols/2-1, monster.Spammer)
 
 	world := dungeon.NewWorld(2, 2)
 	world.Set(dungeon.Loc(0, 0), room1)
@@ -152,18 +154,17 @@ func (g *Game) restart() {
 	g.Stop()
 	g.player = player.WithName("Player 1", g.playerWpm)
 	
+	/*
 	cm := g.makeCombat([]monster.Type{monster.Scammer})
 	cm.AddListener(g)
 	g.curModule = cm
-	g.Start()
+	g.Start()*/
 	
-	/*
 	dm := makeDungeon(g.player)
 	dm.AddListener(g)
 	g.dungeonModule = dm
 	g.curModule = dm
 	g.Start()
-	*/
 }
 
 // Listen handles the state transitions between the different modules.
@@ -196,6 +197,7 @@ func (g *Game) Listen(e string, extra interface{}) {
 		g.Stop()
 		// Check to see if we've completed the game
 		g.dungeonModule.ReplaceMonsterWithPlayer()
+		g.dungeonModule.MaybeUnlockCurrentRoom()
 
 		if g.dungeonModule.HasWon() {
 			win := gameover.NewWinModule(g.player)

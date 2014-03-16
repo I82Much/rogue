@@ -16,7 +16,8 @@ const (
 	// Tiles
 	Floor Tile = iota
 	Wall
-	DoorTile
+	LockedDoor
+	UnlockedDoor
 	Water
 	Bridge
 
@@ -107,7 +108,7 @@ func (w *Room) SetTile(loc Location, t Tile) {
 
 func (w *Room) SetDoor(loc Location, d *Door) {
 	w.doors[loc] = d
-	w.SetTile(loc, DoorTile)
+	w.SetTile(loc, LockedDoor)
 }
 
 func (w *Room) MonstersAt(loc Location) []monster.Type {
@@ -127,6 +128,12 @@ func (w *Room) ReplaceMonsterWithPlayer(loc Location) {
 	/*w.creatures[loc.Row][loc.Col] = PlayerCreature
 	w.creatures[w.playerLoc.Row][w.playerLoc.Col] = None*/
 	w.playerLoc = loc
+}
+
+func (w *Room) UnlockDoors() {
+	for loc := range w.doors {
+		w.SetTile(loc, UnlockedDoor)
+	}
 }
 
 func (w *Room) AnyMonstersLeft() bool {

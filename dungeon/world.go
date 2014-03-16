@@ -45,7 +45,7 @@ func (w *World) MovePlayer(rows, cols int) MovementResult {
 	r := w.CurrentRoom()
 	res := r.MovePlayer(rows, cols)
 	// Did player move onto a door
-	if res == Move && r.PlayerTile() == DoorTile {
+	if res == Move && r.PlayerTile() == UnlockedDoor {
 		d := r.doors[r.playerLoc]
 		if d.From == nil || d.To == nil {
 			panic(fmt.Sprintf("nil from/to for door at loc %v", r.playerLoc))

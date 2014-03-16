@@ -22,7 +22,7 @@ func NewView(m *Model) *View {
 
 func (t Tile) Passable() bool {
 	switch t {
-	case Floor, DoorTile, Bridge:
+	case Floor, UnlockedDoor, Bridge:
 		return true
 	}
 	return false
@@ -34,8 +34,10 @@ func (t Tile) Rune() rune {
 		return ' '
 	case Wall:
 		return '*'
-	case DoorTile:
+	case UnlockedDoor:
 		return 'D'
+	case LockedDoor:
+		return 'L'
 	case Water:
 		return '░'
 	case Bridge:
