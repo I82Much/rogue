@@ -16,7 +16,7 @@ type World struct {
 
 const (
 	minMonstersPerRoom = 1
-	maxMonstersPerRoom = 5
+	maxMonstersPerRoom = 1
 
 	// 20% of the time we'll stack two consecutive monsters on the same spot
 	probOfStacking = float32(0.2)
@@ -149,7 +149,10 @@ func fillRoomWithMonsters(r *Room) {
 }
 
 func randMonsters() []monster.Type {
-	numMonsters := minMonstersPerRoom + int(rand.Int31n(int32(maxMonstersPerRoom-minMonstersPerRoom)))
+	numMonsters := minMonstersPerRoom
+	if minMonstersPerRoom != maxMonstersPerRoom {
+		 numMonsters = minMonstersPerRoom + int(rand.Int31n(int32(maxMonstersPerRoom-minMonstersPerRoom)))
+	}
 	var types []monster.Type
 	for i := 0; i < numMonsters; i++ {
 		monsterIndex := rand.Perm(len(monster.All))[0]
