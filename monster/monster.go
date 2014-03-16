@@ -19,6 +19,18 @@ const (
 )
 
 var (
+	All = []Type {
+		Haxor,
+		Scammer,
+		Spammer,
+		Blogger,
+		HaxorScammer,
+		HaxorSpammer,
+		HaxorBlogger,
+	}
+)
+
+var (
 	descriptions = map[Type][]string{
 		Haxor: []string{
 			"pwning hax0r",

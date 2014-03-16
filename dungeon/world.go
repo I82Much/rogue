@@ -2,6 +2,9 @@ package dungeon
 
 import (
 	"fmt"
+	"math/rand"
+	
+	"github.com/I82Much/rogue/monster"
 )
 
 // TODO implement world in terms of rooms
@@ -10,6 +13,14 @@ type World struct {
 	rooms       [][]*Room
 	currentRoom Location
 }
+
+const (
+	minMonstersPerRoom = 1
+	maxMonstersPerRoom = 5
+	
+	// 20% of the time we'll stack two consecutive monsters on the same spot
+	probOfStacking = float32(0.2)
+)
 
 func NewWorld(rows, cols int) *World {
 	rooms := make([][]*Room, rows)
@@ -20,6 +31,49 @@ func NewWorld(rows, cols int) *World {
 		rooms:       rooms,
 		currentRoom: Loc(0, 0),
 	}
+}
+
+func RandomWorld(rows, cols int) *World {
+	w := NewWorld(rows, cols)
+	for row := 0; row < rows; row++ {
+		for col := 0; col < cols; col++ {
+			room := RandomWalledRoom()
+			fillRoomWithMonsters(room)
+			// TODO(ndunn): automatically add all the doors between different rooms
+			w.Set(Loc(row, col), room)
+		}
+	}
+	// Spawn player in a random room
+	randRow := int(rand.Int31n(int32(rows)))
+	randCol := int(rand.Int31n(int32(cols)))
+	w.currentRoom = Loc(randRow, randCol)
+	w.CurrentRoom().RandSpawn()
+	return w
+}
+
+func fillRoomWithMonsters(r *Room) {
+	lastLoc := InvalidLoc
+	for _, m := range randMonsters() {
+		// some % of the time, we stack monsters
+		if lastLoc != InvalidLoc && rand.Float32() < probOfStacking {
+			r.AddMonster(lastLoc, m)
+		} else {
+			lastLoc, _ = r.SpawnMonster(m)
+		}
+	}
+}
+
+func randMonsters() []monster.Type {
+	numMonsters := minMonstersPerRoom + int(rand.Int31n(int32(maxMonstersPerRoom-minMonstersPerRoom)))
+	var types []monster.Type
+	for i := 0; i < numMonsters; i++ {
+		monsterIndex := rand.Perm(len(monster.All))[0]
+		types = append(types, monster.All[monsterIndex])
+	}
+	if len(types) < minMonstersPerRoom {
+		panic(fmt.Sprintf("expected at least %d monsters; got %d", minMonstersPerRoom, len(types)))
+	}
+	return types
 }
 
 func (w *World) AnyMonstersLeft() bool {

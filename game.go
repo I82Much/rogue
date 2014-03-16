@@ -63,18 +63,14 @@ func (g *Game) makeCombat(t []monster.Type) Module {
 
 // TODO(ndunn): randomize
 func makeDungeon(p *player.Player) *dungeon.Controller {
+	
+	/*
 	room1 := dungeon.IslandRoom(map[dungeon.DoorDir]bool{
 		dungeon.East:true,
 		dungeon.South:true,
 	})
 	room1.RandSpawn()
 	room1.SpawnMonster(monster.Scammer)
-
-	/*
-	room1.SetTile(dungeon.Loc(1, 2), dungeon.Water)
-	room1.SetTile(dungeon.Loc(2, 2), dungeon.Water)
-	room1.SetTile(dungeon.Loc(3, 2), dungeon.Bridge)
-	room1.SetTile(dungeon.Loc(4, 2), dungeon.Water)*/
 
 	// 2nd room to east of room 1
 	room2 := dungeon.RandomWalledRoom()
@@ -119,7 +115,9 @@ func makeDungeon(p *player.Player) *dungeon.Controller {
 	}
 	d1_3.Same = d3_1
 	room3.SetDoor(dungeon.North, d3_1)
-	return dungeon.NewModule(world, p)
+	return dungeon.NewModule(world, p)*/
+	
+	return dungeon.NewModule(dungeon.RandomWorld(2, 2), p)
 }
 
 func NewGame() *Game {

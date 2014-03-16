@@ -213,8 +213,7 @@ func (w *Room) RandSpawn() {
 }
 
 // Returns error if it couldn't add monster
-func (w *Room) AddMonster(row, col int, m monster.Type) error {
-	loc := Loc(row, col)
+func (w *Room) AddMonster(loc Location, m monster.Type) error {
 	if res := w.MonsterCanOccupy(loc); res != Move {
 		return fmt.Errorf("Monster can't occupy %v: %v", loc, res)
 	}
@@ -236,7 +235,7 @@ func (w *Room) SpawnMonster(m monster.Type) (Location, error) {
 		panic("Cannot find any place to spawn monster")
 	}
 	loc := open[int(rand.Int31n(int32(len(open))))]
-	return loc, w.AddMonster(loc.Row, loc.Col, m)
+	return loc, w.AddMonster(loc, m)
 }
 
 // MovePlayer moves the player the given number of rows/cols relative
