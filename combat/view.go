@@ -81,7 +81,6 @@ func (v *View) rowForWord(w *AttackWord) int {
 	return row
 }
 
-
 func (v *View) RenderWords() {
 	for _, word := range v.Model.Words() {
 		// Some words aren't actually visible yet - they're in the model but there's a delay

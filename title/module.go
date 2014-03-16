@@ -17,6 +17,20 @@ const (
          |_|\___/ \_|| |\____|\____)\______)__  | ||_/ \____)_|    
                  (_____|                  (____/|_|                
 		  
+* Explore the dungeon, fighting monsters with your typing skills.
+
+* You must clear out each room before proceeding through to the next room. 
+
+* During combat the object is to defend your player by typing the words that fall from
+  the top of the screen. If the word reaches the red line, your player takes damage.
+
+* In the attack phase of combat, you must type the word before it reaches the top
+  line at the top of the screen.
+
+Once you've cleared out every room of monsters, you'll win.
+
+ Good luck!
+		  
 		Press
 		  'e' for Easy         (15 wpm)
 		  'm' for Medium       (40 wpm)
