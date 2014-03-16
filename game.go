@@ -42,10 +42,9 @@ var (
 func (g *Game) lifeForMonster(t monster.Type) int {
 	// TODO use player's level
 	// TODO change it based on the monster
-	return 10
+	return 20
 }
 
-// TODO(ndunn): this needs to be pulled out of the world
 func (g *Game) makeCombat(t []monster.Type) Module {
 	if len(t) == 0 {
 		panic("need >= 1 monster")
@@ -62,7 +61,7 @@ func (g *Game) makeCombat(t []monster.Type) Module {
 }
 
 func makeDungeon(p *player.Player) *dungeon.Controller {
-	return dungeon.NewModule(dungeon.RandomWorld(2, 2), p)
+	return dungeon.NewModule(dungeon.RandomWorld(3, 3), p)
 }
 
 func NewGame() *Game {
@@ -97,13 +96,6 @@ func (g *Game) updateStats(stats stats.Stats) {
 func (g *Game) restart() {
 	g.Stop()
 	g.player = player.WithName("Player 1", g.playerWpm)
-
-	/*
-		cm := g.makeCombat([]monster.Type{monster.Scammer})
-		cm.AddListener(g)
-		g.curModule = cm
-		g.Start()*/
-
 	dm := makeDungeon(g.player)
 	dm.AddListener(g)
 	g.dungeonModule = dm

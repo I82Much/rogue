@@ -336,8 +336,9 @@ func RandomWalledRoom(doorMap map[DoorDir]bool) *Room {
 	return w
 }
 
+// TODO(ndunn): implement more room types
 func RandomRoom(doorMap map[DoorDir]bool) *Room {
-	propIsland := float32(0.3)
+	propIsland := float32(0.5)
 	if rand.Float32() < propIsland {
 		return IslandRoom(doorMap)
 	}

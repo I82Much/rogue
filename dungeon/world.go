@@ -7,8 +7,6 @@ import (
 	"github.com/I82Much/rogue/monster"
 )
 
-// TODO implement world in terms of rooms
-
 type World struct {
 	rooms       [][]*Room
 	currentRoom Location
@@ -16,7 +14,7 @@ type World struct {
 
 const (
 	minMonstersPerRoom = 1
-	maxMonstersPerRoom = 1
+	maxMonstersPerRoom = 5
 
 	// 20% of the time we'll stack two consecutive monsters on the same spot
 	probOfStacking = float32(0.2)
