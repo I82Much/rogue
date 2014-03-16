@@ -14,13 +14,13 @@ import (
 )
 
 type View struct {
-	Model       *Model
-	
+	Model *Model
+
 	// Row at which the word is off screen when attacking monster
 	monsterDivLine int
 	// Row at which the word from monster does damage against player
 	playerDivLine int
-	description renderer
+	description   renderer
 }
 
 type renderer interface {
@@ -29,11 +29,11 @@ type renderer interface {
 
 func NewView(m *Model) *View {
 	return &View{
-		Model:       m,
+		Model: m,
 		// TODO(ndunn): this should come from termbox
 		monsterDivLine: 5,
-		playerDivLine: 30,
-		description: initModule(m),
+		playerDivLine:  30,
+		description:    initModule(m),
 	}
 }
 
@@ -59,7 +59,7 @@ func initModule(m *Model) renderer {
 	text := "Get ready to fight \n"
 	var descriptions []string
 	for t, num := range monsterMap {
-		descriptions = append(descriptions, "* " + t.Description(num))
+		descriptions = append(descriptions, "* "+t.Description(num))
 	}
 	text += strings.Join(descriptions, "\n")
 	// TODO would be good to be able to skip..
@@ -185,24 +185,24 @@ func (v *View) RenderAccuracy() {
 // The dividing lines show where the words will either do damage or cease doing damage.
 func (v *View) RenderDividingLines() {
 	divider := "________________________________________________________________"
-	
+
 	monsterColor := termbox.ColorDefault
 	playerColor := termbox.ColorDefault
-	
+
 	switch v.Model.State() {
-		// Player will be attacking, so render the MONSTER's line as red
-		case EnteringAttack, Attack:
-			monsterColor = termbox.ColorRed
-		case EnteringDefense, Defense:
-			playerColor = termbox.ColorRed
-	}	
-	
+	// Player will be attacking, so render the MONSTER's line as red
+	case EnteringAttack, Attack:
+		monsterColor = termbox.ColorRed
+	case EnteringDefense, Defense:
+		playerColor = termbox.ColorRed
+	}
+
 	// Monster's dividing line
-	render.RenderWithColor(divider, v.monsterDivLine - 1, 0, monsterColor, termbox.ColorDefault)
-	
+	render.RenderWithColor(divider, v.monsterDivLine-1, 0, monsterColor, termbox.ColorDefault)
+
 	// Player's dividing line
 	// Pull it up one row so that it is at the TOP of where it can be.
-	render.RenderWithColor(divider, v.playerDivLine - 1, 0, playerColor, termbox.ColorDefault)
+	render.RenderWithColor(divider, v.playerDivLine-1, 0, playerColor, termbox.ColorDefault)
 }
 
 // If it's between rounds, put a countdown clock

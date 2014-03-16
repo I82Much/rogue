@@ -18,3 +18,10 @@ func Loc(rows, cols int) Location {
 		Col: cols,
 	}
 }
+
+func (l Location) ManhattanDist(loc Location) int {
+	rowDiff := max(l.Row, loc.Row) - min(l.Row, loc.Row)
+	colDiff := max(l.Col, loc.Col) - min(l.Col, loc.Col)
+	return rowDiff + colDiff
+
+}

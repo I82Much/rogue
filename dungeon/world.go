@@ -3,7 +3,7 @@ package dungeon
 import (
 	"fmt"
 	"math/rand"
-	
+
 	"github.com/I82Much/rogue/monster"
 )
 
@@ -17,7 +17,7 @@ type World struct {
 const (
 	minMonstersPerRoom = 1
 	maxMonstersPerRoom = 5
-	
+
 	// 20% of the time we'll stack two consecutive monsters on the same spot
 	probOfStacking = float32(0.2)
 )
@@ -37,18 +37,103 @@ func RandomWorld(rows, cols int) *World {
 	w := NewWorld(rows, cols)
 	for row := 0; row < rows; row++ {
 		for col := 0; col < cols; col++ {
-			room := RandomWalledRoom()
-			fillRoomWithMonsters(room)
+			doorLocs := make(map[DoorDir]bool)
+			// TODO(ndunn): it'd be better if not every room were completely connected, but this is an easier algorithm.
+			if row != 0 {
+				doorLocs[North] = true
+			}
+			if row != rows-1 {
+				doorLocs[South] = true
+			}
+			if col != 0 {
+				doorLocs[West] = true
+			}
+			if col != cols-1 {
+				doorLocs[East] = true
+			}
+
+			room := RandomRoom(doorLocs)
 			// TODO(ndunn): automatically add all the doors between different rooms
 			w.Set(Loc(row, col), room)
 		}
 	}
+
+	// Construct the portals between the rooms. This is a pain in the butt.
+	for row := 0; row < cols; row++ {
+		for col := 0; col < cols; col++ {
+			room := w.rooms[row][col]
+
+			var northRoom, eastRoom, southRoom, westRoom *Room
+			if row != 0 {
+				northRoom = w.rooms[row-1][col]
+			}
+			if row != rows-1 {
+				southRoom = w.rooms[row+1][col]
+			}
+			if col != 0 {
+				westRoom = w.rooms[row][col-1]
+			}
+			if col != cols-1 {
+				eastRoom = w.rooms[row][col+1]
+			}
+
+			// Set the doors between them
+			if northRoom != nil {
+				maybeJoinAdjacentNorthSouthRooms(northRoom, room)
+			}
+			if southRoom != nil {
+				maybeJoinAdjacentNorthSouthRooms(room, southRoom)
+			}
+			if westRoom != nil {
+				maybeJoinAdjacentWestEastRooms(westRoom, room)
+			}
+			if eastRoom != nil {
+				maybeJoinAdjacentWestEastRooms(room, eastRoom)
+			}
+
+			// Only fill the room after setting the doors so that the monsters don't show up right next to door
+			fillRoomWithMonsters(room)
+		}
+	}
+
 	// Spawn player in a random room
 	randRow := int(rand.Int31n(int32(rows)))
 	randCol := int(rand.Int31n(int32(cols)))
 	w.currentRoom = Loc(randRow, randCol)
 	w.CurrentRoom().RandSpawn()
 	return w
+}
+
+func maybeJoinAdjacentNorthSouthRooms(north, south *Room) {
+	d1_2 := &Door{
+		From: north,
+		To:   south,
+	}
+	d2_1 := &Door{
+		From: south,
+		To:   north,
+	}
+	d1_2.Same = d2_1
+	d2_1.Same = d1_2
+
+	north.SetDoor(South, d1_2)
+	south.SetDoor(North, d2_1)
+}
+
+func maybeJoinAdjacentWestEastRooms(west, east *Room) {
+	d1_2 := &Door{
+		From: west,
+		To:   east,
+	}
+	d2_1 := &Door{
+		From: east,
+		To:   west,
+	}
+	d1_2.Same = d2_1
+	d2_1.Same = d1_2
+
+	west.SetDoor(East, d1_2)
+	east.SetDoor(West, d2_1)
 }
 
 func fillRoomWithMonsters(r *Room) {

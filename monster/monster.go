@@ -19,7 +19,7 @@ const (
 )
 
 var (
-	All = []Type {
+	All = []Type{
 		Haxor,
 		Scammer,
 		Spammer,

@@ -21,7 +21,7 @@ const (
 	MaxRows = 16
 	MinCols = 6
 	MaxCols = 40
-	
+
 	// Tiles
 	Floor Tile = iota
 	Wall
@@ -35,6 +35,7 @@ const (
 	OutOfBounds
 	Impassable
 	CreatureOccupying
+	NextToDoor
 )
 
 var (
@@ -42,11 +43,12 @@ var (
 )
 
 type DoorDir string
+
 const (
 	North DoorDir = "NORTH"
-	East DoorDir = "EAST"
+	East  DoorDir = "EAST"
 	South DoorDir = "SOUTH"
-	West DoorDir = "WEST"
+	West  DoorDir = "WEST"
 )
 
 type Door struct {
@@ -95,24 +97,6 @@ func NewRoom(rows, cols int) *Room {
 		playerLoc: InvalidLoc,
 		doors:     make(map[Location]*Door),
 	}
-}
-
-func WalledRoom(rows, cols int) *Room {
-	r := NewRoom(rows, cols)
-	// Make the outline set to WALL
-	for i := 0; i < cols; i++ {
-		// Top row
-		r.SetTile(Loc(0, i), Wall)
-		// Bottom row
-		r.SetTile(Loc(rows-1, i), Wall)
-	}
-	for i := 0; i < rows; i++ {
-		// Top row
-		r.SetTile(Loc(i, 0), Wall)
-		// Bottom row
-		r.SetTile(Loc(i, cols-1), Wall)
-	}
-	return r
 }
 
 // DoorLocation returns the location of the given door, or nil if it doesn't exist
@@ -200,7 +184,7 @@ func (w *Room) RandSpawn() {
 	for row := 0; row < w.Rows(); row++ {
 		for col := 0; col < w.Cols(); col++ {
 			loc := Loc(row, col)
-			if w.PlayerCanOccupy(loc) == Move{
+			if w.PlayerCanOccupy(loc) == Move {
 				open = append(open, loc)
 			}
 		}
@@ -226,7 +210,7 @@ func (w *Room) SpawnMonster(m monster.Type) (Location, error) {
 	for row := 0; row < w.Rows(); row++ {
 		for col := 0; col < w.Cols(); col++ {
 			loc := Loc(row, col)
-			if w.MonsterCanOccupy(loc) == Move{
+			if w.MonsterCanOccupy(loc) == Move {
 				open = append(open, loc)
 			}
 		}
@@ -255,7 +239,13 @@ func (w *Room) PlayerCanOccupy(loc Location) MovementResult {
 	if w.MonstersAt(loc) != nil {
 		return CreatureOccupying
 	}
-	return w.MonsterCanOccupy(loc)
+	if !w.InBounds(loc) {
+		return OutOfBounds
+	}
+	if !w.TileAt(loc).Passable() {
+		return Impassable
+	}
+	return Move
 }
 
 func (w *Room) MonsterCanOccupy(loc Location) MovementResult {
@@ -264,6 +254,12 @@ func (w *Room) MonsterCanOccupy(loc Location) MovementResult {
 	}
 	if !w.TileAt(loc).Passable() {
 		return Impassable
+	}
+	// Make sure monster doesn't spawn next to a door. That's really evil
+	for doorLoc := range w.doors {
+		if doorLoc.ManhattanDist(loc) <= 1 {
+			return NextToDoor
+		}
 	}
 	return Move
 }
@@ -302,20 +298,53 @@ func (m MovementResult) String() string {
 		return "Impassable"
 	case CreatureOccupying:
 		return "Creature"
+	case NextToDoor:
+		return "Next to a door"
 	default:
 		panic(fmt.Sprintf("unknown movement result type %v", m))
 
 	}
 }
 
-func RandomWalledRoom() *Room {
-	rows := MinRows + int(rand.Int31n(MaxRows - MinRows))
-	cols := MinCols + int(rand.Int31n(MaxCols - MinCols))
-	log.Printf("Creating room of dimensions %d rows %d cols", rows, cols)
-	return WalledRoom(rows, cols)
+func WalledRoom(rows, cols int) *Room {
+	r := NewRoom(rows, cols)
+	// Make the outline set to WALL
+	for i := 0; i < cols; i++ {
+		// Top row
+		r.SetTile(Loc(0, i), Wall)
+		// Bottom row
+		r.SetTile(Loc(rows-1, i), Wall)
+	}
+	for i := 0; i < rows; i++ {
+		// Top row
+		r.SetTile(Loc(i, 0), Wall)
+		// Bottom row
+		r.SetTile(Loc(i, cols-1), Wall)
+	}
+	return r
 }
 
-func (w *Room) LocForDoor(d DoorDir) Location{
+func RandomWalledRoom(doorMap map[DoorDir]bool) *Room {
+	rows := MinRows + int(rand.Int31n(MaxRows-MinRows))
+	cols := MinCols + int(rand.Int31n(MaxCols-MinCols))
+	log.Printf("Creating room of dimensions %d rows %d cols", rows, cols)
+	w := WalledRoom(rows, cols)
+	for dir := range doorMap {
+		loc := w.LocForDoor(dir)
+		w.SetTile(loc, LockedDoor)
+	}
+	return w
+}
+
+func RandomRoom(doorMap map[DoorDir]bool) *Room {
+	propIsland := float32(0.3)
+	if rand.Float32() < propIsland {
+		return IslandRoom(doorMap)
+	}
+	return RandomWalledRoom(doorMap)
+}
+
+func (w *Room) LocForDoor(d DoorDir) Location {
 	switch d {
 	case North:
 		return Loc(0, w.Cols()/2)
@@ -329,7 +358,12 @@ func (w *Room) LocForDoor(d DoorDir) Location{
 	panic(fmt.Sprintf("unknown door location %v", d))
 }
 
-func min(a, b int) int{
+func (w *Room) HasDoorTile(d DoorDir) bool {
+	tile := w.TileAt(w.LocForDoor(d))
+	return tile == UnlockedDoor || tile == LockedDoor
+}
+
+func min(a, b int) int {
 	if a < b {
 		return a
 	}
@@ -344,19 +378,19 @@ func max(a, b int) int {
 
 // An Island in the middle of the room surrounded by water
 func IslandRoom(doors map[DoorDir]bool) *Room {
-	r := RandomWalledRoom()
+	r := RandomWalledRoom(doors)
 	// Flood room with water
-	for row := 1; row < r.Rows() - 1; row++ {
-		for col := 1; col < r.Cols() - 1; col++ {
+	for row := 1; row < r.Rows()-1; row++ {
+		for col := 1; col < r.Cols()-1; col++ {
 			r.SetTile(Loc(row, col), Water)
 		}
 	}
-	
+
 	// Build an island in middle
-	middleRow := r.Rows()/2
-	middleCol := r.Cols()/2
-	for row := middleRow-1; row <= middleRow + 1; row++ {
-		for col := middleCol; col <= middleCol + 1; col++ {
+	middleRow := r.Rows() / 2
+	middleCol := r.Cols() / 2
+	for row := middleRow - 1; row <= middleRow+1; row++ {
+		for col := middleCol; col <= middleCol+1; col++ {
 			r.SetTile(Loc(row, col), Floor)
 		}
 	}
@@ -377,7 +411,7 @@ func IslandRoom(doors map[DoorDir]bool) *Room {
 			for col := minCol; col <= maxCol; col++ {
 				bridgeLoc := Loc(row, col)
 				log.Printf("bridge loc? %v\n", bridgeLoc)
-				
+
 				if r.TileAt(bridgeLoc) == Water {
 					log.Printf("placing bridge at %d %d", row, col)
 					r.SetTile(bridgeLoc, Bridge)

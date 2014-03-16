@@ -2,7 +2,7 @@ package dungeon
 
 import (
 	"log"
-	
+
 	"github.com/I82Much/rogue/event"
 	"github.com/I82Much/rogue/player"
 	termbox "github.com/nsf/termbox-go"

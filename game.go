@@ -63,60 +63,60 @@ func (g *Game) makeCombat(t []monster.Type) Module {
 
 // TODO(ndunn): randomize
 func makeDungeon(p *player.Player) *dungeon.Controller {
-	
+
 	/*
-	room1 := dungeon.IslandRoom(map[dungeon.DoorDir]bool{
-		dungeon.East:true,
-		dungeon.South:true,
-	})
-	room1.RandSpawn()
-	room1.SpawnMonster(monster.Scammer)
+		room1 := dungeon.IslandRoom(map[dungeon.DoorDir]bool{
+			dungeon.East:true,
+			dungeon.South:true,
+		})
+		room1.RandSpawn()
+		room1.SpawnMonster(monster.Scammer)
 
-	// 2nd room to east of room 1
-	room2 := dungeon.RandomWalledRoom()
-	room2.SpawnMonster(monster.Blogger)
-	room2.SpawnMonster(monster.Blogger)
+		// 2nd room to east of room 1
+		room2 := dungeon.RandomWalledRoom()
+		room2.SpawnMonster(monster.Blogger)
+		room2.SpawnMonster(monster.Blogger)
 
-	// 3rd room to south of room 1
-	room3 := dungeon.RandomWalledRoom()
-	room3.AddMonster(room3.Rows()/2, room3.Cols()/2-1, monster.Scammer)
-	room3.AddMonster(room3.Rows()/2, room3.Cols()/2-1, monster.Spammer)
+		// 3rd room to south of room 1
+		room3 := dungeon.RandomWalledRoom()
+		room3.AddMonster(room3.Rows()/2, room3.Cols()/2-1, monster.Scammer)
+		room3.AddMonster(room3.Rows()/2, room3.Cols()/2-1, monster.Spammer)
 
-	world := dungeon.NewWorld(2, 2)
-	world.Set(dungeon.Loc(0, 0), room1)
-	world.Set(dungeon.Loc(0, 1), room2)
-	world.Set(dungeon.Loc(1, 0), room3)
+		world := dungeon.NewWorld(2, 2)
+		world.Set(dungeon.Loc(0, 0), room1)
+		world.Set(dungeon.Loc(0, 1), room2)
+		world.Set(dungeon.Loc(1, 0), room3)
 
-	// Set up doors between the rooms
-	d1_2 := &dungeon.Door{
-		From: room1,
-		To:   room2,
-	}
-	// Door to east
-	room1.SetDoor(dungeon.East, d1_2)
-	d2_1 := &dungeon.Door{
-		From: room2,
-		To:   room1,
-		Same: d1_2,
-	}
-	d1_2.Same = d2_1
-	room2.SetDoor(dungeon.West, d2_1)
+		// Set up doors between the rooms
+		d1_2 := &dungeon.Door{
+			From: room1,
+			To:   room2,
+		}
+		// Door to east
+		room1.SetDoor(dungeon.East, d1_2)
+		d2_1 := &dungeon.Door{
+			From: room2,
+			To:   room1,
+			Same: d1_2,
+		}
+		d1_2.Same = d2_1
+		room2.SetDoor(dungeon.West, d2_1)
 
-	d1_3 := &dungeon.Door{
-		From: room1,
-		To:   room3,
-	}
-	// Door to south
-	room1.SetDoor(dungeon.South, d1_3)
-	d3_1 := &dungeon.Door{
-		From: room3,
-		To:   room1,
-		Same: d1_3,
-	}
-	d1_3.Same = d3_1
-	room3.SetDoor(dungeon.North, d3_1)
-	return dungeon.NewModule(world, p)*/
-	
+		d1_3 := &dungeon.Door{
+			From: room1,
+			To:   room3,
+		}
+		// Door to south
+		room1.SetDoor(dungeon.South, d1_3)
+		d3_1 := &dungeon.Door{
+			From: room3,
+			To:   room1,
+			Same: d1_3,
+		}
+		d1_3.Same = d3_1
+		room3.SetDoor(dungeon.North, d3_1)
+		return dungeon.NewModule(world, p)*/
+
 	return dungeon.NewModule(dungeon.RandomWorld(2, 2), p)
 }
 
@@ -152,13 +152,13 @@ func (g *Game) updateStats(stats stats.Stats) {
 func (g *Game) restart() {
 	g.Stop()
 	g.player = player.WithName("Player 1", g.playerWpm)
-	
+
 	/*
-	cm := g.makeCombat([]monster.Type{monster.Scammer})
-	cm.AddListener(g)
-	g.curModule = cm
-	g.Start()*/
-	
+		cm := g.makeCombat([]monster.Type{monster.Scammer})
+		cm.AddListener(g)
+		g.curModule = cm
+		g.Start()*/
+
 	dm := makeDungeon(g.player)
 	dm.AddListener(g)
 	g.dungeonModule = dm
