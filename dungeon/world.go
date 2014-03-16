@@ -18,6 +18,7 @@ const (
 
 	// 20% of the time we'll stack two consecutive monsters on the same spot
 	probOfStacking = float32(0.2)
+	maxNumStack = 3
 )
 
 func NewWorld(rows, cols int) *World {
@@ -138,7 +139,7 @@ func fillRoomWithMonsters(r *Room) {
 	lastLoc := InvalidLoc
 	for _, m := range randMonsters() {
 		// some % of the time, we stack monsters
-		if lastLoc != InvalidLoc && rand.Float32() < probOfStacking {
+		if lastLoc != InvalidLoc && rand.Float32() < probOfStacking && len(r.MonstersAt(lastLoc)) < maxNumStack {
 			r.AddMonster(lastLoc, m)
 		} else {
 			lastLoc, _ = r.SpawnMonster(m)
