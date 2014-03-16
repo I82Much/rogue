@@ -22,9 +22,6 @@ type Game struct {
 }
 
 const (
-	rows = 16
-	cols = 32
-
 	EasyWpm         = 15
 	MediumWpm       = 40
 	HardWpm         = 70
@@ -66,24 +63,25 @@ func (g *Game) makeCombat(t []monster.Type) Module {
 
 // TODO(ndunn): randomize
 func makeDungeon(p *player.Player) *dungeon.Controller {
-	room1 := dungeon.WalledRoom(rows, cols)
-	room1.Spawn(rows/2, cols/2)
-	room1.AddMonster(1, cols/2-1, monster.Scammer)
+	room1 := dungeon.RandomWalledRoom()
+	room1.RandSpawn()
+	room1.AddMonster(1, room1.Cols()/2-1, monster.Scammer)
 
+	/*
 	room1.SetTile(dungeon.Loc(1, 2), dungeon.Water)
 	room1.SetTile(dungeon.Loc(2, 2), dungeon.Water)
 	room1.SetTile(dungeon.Loc(3, 2), dungeon.Bridge)
-	room1.SetTile(dungeon.Loc(4, 2), dungeon.Water)
+	room1.SetTile(dungeon.Loc(4, 2), dungeon.Water)*/
 
 	// 2nd room to east of room 1
-	room2 := dungeon.WalledRoom(rows, cols)
-	room2.AddMonster(rows/2, cols/2-1, monster.Blogger)
-	room2.AddMonster(rows/2, cols/2-1, monster.Blogger)
+	room2 := dungeon.RandomWalledRoom()
+	room2.AddMonster(room2.Rows()/2, room2.Cols()/2-1, monster.Blogger)
+	room2.AddMonster(room2.Rows()/2, room2.Cols()/2-1, monster.Blogger)
 
 	// 3rd room to south of room 1
-	room3 := dungeon.WalledRoom(rows, cols)
-	room3.AddMonster(rows/2, cols/2-1, monster.Scammer)
-	room3.AddMonster(rows/2, cols/2-1, monster.Spammer)
+	room3 := dungeon.RandomWalledRoom()
+	room3.AddMonster(room3.Rows()/2, room3.Cols()/2-1, monster.Scammer)
+	room3.AddMonster(room3.Rows()/2, room3.Cols()/2-1, monster.Spammer)
 
 	world := dungeon.NewWorld(2, 2)
 	world.Set(dungeon.Loc(0, 0), room1)
@@ -96,28 +94,28 @@ func makeDungeon(p *player.Player) *dungeon.Controller {
 		To:   room2,
 	}
 	// Door to east
-	room1.SetDoor(dungeon.Loc(rows/2, cols-1), d1_2)
+	room1.SetDoor(dungeon.Loc(room1.Rows()/2, room1.Cols()-1), d1_2)
 	d2_1 := &dungeon.Door{
 		From: room2,
 		To:   room1,
 		Same: d1_2,
 	}
 	d1_2.Same = d2_1
-	room2.SetDoor(dungeon.Loc(rows/2, 0), d2_1)
+	room2.SetDoor(dungeon.Loc(room1.Rows()/2/2, 0), d2_1)
 
 	d1_3 := &dungeon.Door{
 		From: room1,
 		To:   room3,
 	}
 	// Door to south
-	room1.SetDoor(dungeon.Loc(rows-1, cols/2), d1_3)
+	room1.SetDoor(dungeon.Loc(room1.Rows()-1, room1.Cols()/2), d1_3)
 	d3_1 := &dungeon.Door{
 		From: room3,
 		To:   room1,
 		Same: d1_3,
 	}
 	d1_3.Same = d3_1
-	room3.SetDoor(dungeon.Loc(0, cols/2), d3_1)
+	room3.SetDoor(dungeon.Loc(0, room3.Cols()/2), d3_1)
 	return dungeon.NewModule(world, p)
 }
 

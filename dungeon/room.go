@@ -2,6 +2,9 @@ package dungeon
 
 import (
 	"fmt"
+	"log"
+	"math/rand"
+	"strings"
 
 	"github.com/I82Much/rogue/monster"
 )
@@ -13,6 +16,12 @@ type Creature int32
 type MovementResult int32
 
 const (
+	// Need 1 for each wall. But if we have monsters etc that's crowded - let's just make sure it's 4x4
+	MinRows = 4
+	MaxRows = 16
+	MinCols = 4
+	MaxCols = 40
+	
 	// Tiles
 	Floor Tile = iota
 	Wall
@@ -50,10 +59,25 @@ type Room struct {
 	doors map[Location]*Door
 }
 
+func (r *Room) String() string {
+	var rows []string
+	for _, row := range r.tiles {
+		tileRows := []string{}
+		for _, col := range row {
+			tileRows = append(tileRows, string(col.Rune()))
+		}
+		rows = append(rows, strings.Join(tileRows, ""))
+	}
+	return strings.Join(rows, "\n")
+}
+
 func NewRoom(rows, cols int) *Room {
 	tiles := make([][]Tile, rows)
 	for row := 0; row < rows; row++ {
 		tiles[row] = make([]Tile, cols)
+		for col := 0; col < cols; col++ {
+			tiles[row][col] = Floor
+		}
 	}
 	return &Room{
 		rows:      rows,
@@ -161,6 +185,24 @@ func (w *Room) Spawn(row, col int) {
 	w.playerLoc = Loc(row, col)
 }
 
+func (w *Room) RandSpawn() {
+	log.Printf("trying to find a space to spawn in\n %v", w.String())
+	var open []Location
+	for row := 0; row < w.Rows(); row++ {
+		for col := 0; col < w.Cols(); col++ {
+			loc := Loc(row, col)
+			if w.PlayerCanOccupy(loc) == Move{
+				open = append(open, loc)
+			}
+		}
+	}
+	if len(open) == 0 {
+		panic("Cannot find any place to spawn")
+	}
+	loc := open[int(rand.Int31n(int32(len(open))))]
+	w.Spawn(loc.Row, loc.Col)
+}
+
 // Returns error if it couldn't add monster
 func (w *Room) AddMonster(row, col int, m monster.Type) error {
 	loc := Loc(row, col)
@@ -239,4 +281,11 @@ func (m MovementResult) String() string {
 		panic(fmt.Sprintf("unknown movement result type %v", m))
 
 	}
+}
+
+func RandomWalledRoom() *Room {
+	rows := MinRows + int(rand.Int31n(MaxRows - MinRows))
+	cols := MinCols + int(rand.Int31n(MaxCols - MinCols))
+	log.Printf("Creating room of dimensions %d rows %d cols", rows, cols)
+	return WalledRoom(rows, cols)
 }
